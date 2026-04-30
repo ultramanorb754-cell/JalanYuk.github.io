@@ -11,6 +11,16 @@
 <style>
 
 </style>
+
+<script>
+function updateCartIcon() {
+  let salesCount = localStorage.getItem("salesCount") || 0;
+  document.getElementById("cartCount").innerText = salesCount;
+}
+
+// Update cart icon saat page load
+document.addEventListener("DOMContentLoaded", updateCartIcon);
+</script>
 </head>
 
 <body>
@@ -26,6 +36,9 @@
     </ul>
 
     <div class="nav-right">
+         <div class="cart-icon-wrapper" onclick="bukaCart()">
+             🛒 <span id="cartCount" class="cart-badge">0</span>
+         </div>
          <button class="nav-btn toggle-btn" onclick="toggleDark()">Dark Mode</button>
     </div>
 </nav>
@@ -38,7 +51,7 @@
       <img src="japan.png" alt="Japan">
       <div class="overlay"></div>
       <div class="slide-content">
-        <h1>Japan</h1>
+        <h1>Jepang</h1>
         <p>
           Nikmati Tokyo, Gunung Fuji, Kyoto, dan budaya tradisional Jepang
           yang memadukan sejarah dengan modernitas.
@@ -50,7 +63,7 @@
       <img src="swiss.png" alt="Swiss">
       <div class="overlay"></div>
       <div class="slide-content">
-        <h1>Swiss</h1>
+        <h1>Swisslandia</h1>
         <p>
           Jelajahi pegunungan Alpen, danau yang jernih,
           dan kota romantis dengan pemandangan indah.
@@ -62,7 +75,7 @@
       <img src="saudi.png" alt="Saudi Arabia">
       <div class="overlay"></div>
       <div class="slide-content">
-        <h1>Saudi Arabia</h1>
+        <h1>Arab Saudi</h1>
         <p>
           Kunjungi Makkah, Madinah, dan Riyadh untuk wisata religi
           dan pengalaman modern yang mewah.
@@ -101,174 +114,263 @@
 
   <div class="card-container">
 
-    <!-- JAPAN -->
-    <div class="card">
-      <img src="japan.png" alt="Japan">
-      <div class="card-content">
-        <h1>Japan</h1>
-        <p>Nikmati keindahan Tokyo, Gunung Fuji, dan budaya tradisional Kyoto.</p>
-        <p class="harga">Mulai dari Rp 25.000.000</p>
-       <button onclick="bukaPopup('japan')">Lihat Detail</button>
-      </div>
-    </div>
-
-    <!-- SWISS -->
-    <div class="card">
-      <img src="swiss.png" alt="Swiss">
-      <div class="card-content">
-        <h1>Swiss</h1>
-        <p>Jelajahi pegunungan Alpen, Danau Zurich, dan kota Lucerne.</p>
-        <p class="harga">Mulai dari Rp 35.000.000</p>
-        <button onclick="bukaPopup('swiss')">Lihat Detail</button>
-      </div>
-    </div>
-
-    <!-- SAUDI ARABIA -->
-    <div class="card">
-      <img src="saudi.png" alt="Saudi Arabia">
-      <div class="card-content">
-        <h1>Saudi Arabia</h1>
-        <p>Kunjungi Makkah, Madinah, dan wisata modern kota Riyadh.</p>
-        <p class="harga">Mulai dari Rp 30.000.000</p>
-        <button onclick="bukaPopup('saudi')">Lihat Detail</button>
-      </div>
-    </div>
-
-    <!-- CHINA -->
+  <!-- SINGAPURA -->
 <div class="card">
-  <img src="cina.png" alt="China">
+
+  <div class="badge best">🔥 Best Seller</div>
+
+  <img src="singapura.png" alt="Singapore">
+
   <div class="card-content">
-    <h1>China</h1>
-    <p>Jelajahi Beijing, Tembok Besar China, dan gemerlap kota Shanghai.</p>
-    <p class="harga">Mulai dari Rp 22.000.000</p>
-    <button onclick="bukaPopup('china')">Lihat Detail</button>
+    <h1>Singapura</h1>
+    <p>Jelajahi Marina Bay Sands, Universal Studios, dan Sentosa.</p>
+    <p class="harga">Mulai dari Rp 12.000.000</p>
+    <button onclick="bukaPopup('singapore')">Lihat Detail</button>
   </div>
+
 </div>
 
-<!-- SOUTH KOREA -->
+<!-- INDONESIA -->
 <div class="card">
-  <img src="korea s.png" alt="South Korea">
-  <div class="card-content">
-    <h1>South Korea</h1>
-    <p>Nikmati Seoul, Nami Island, dan budaya K-Pop yang mendunia.</p>
-    <p class="harga">Mulai dari Rp 24.000.000</p>
-    <button onclick="bukaPopup('korsel')">Lihat Detail</button>
-  </div>
-</div>
 
-<!-- NORTH KOREA -->
-<div class="card">
-  <img src="korea u.png" alt="North Korea">
-  <div class="card-content">
-    <h1>North Korea</h1>
-    <p>Kunjungi Pyongyang dan wisata sejarah yang unik dan eksklusif.</p>
-    <p class="harga">Mulai dari Rp 40.000.000</p>
-   <button onclick="bukaPopup('korut')">Lihat Detail</button>
-  </div>
-</div>
+  <div class="badge populer">⭐ Pilihan Populer</div>
 
-<!-- AUSTRALIA -->
-<div class="card">
-  <img src="australia.png" alt="Australia">
-  <div class="card-content">
-    <h1>Australia</h1>
-    <p>Eksplor Sydney Opera House, Melbourne, dan Great Barrier Reef.</p>
-    <p class="harga">Mulai dari Rp 28.000.000</p>
-    <button onclick="bukaPopup('australia')">Lihat Detail</button>
-  </div>
-</div>
-
-<div class="card">
   <img src="bali.png" alt="Indonesia">
+
   <div class="card-content">
-    <h1>indonesia</h1>
-    <p>Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot</p>
+    <h1>Indonesia</h1>
+    <p>Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot.</p>
     <p class="harga">Mulai dari Rp 15.000.000</p>
     <button onclick="bukaPopup('indonesia')">Lihat Detail</button>
   </div>
+
 </div>
 
+<!-- THAILAND -->
 <div class="card">
-  <img src="paris.png" alt="Frence">
-  <div class="card-content">
-    <h1>Frence</h1>
-    <p>Kunjungi Menara Eiffel, Louvre, dan kota romantis Paris.</p>
-    <p class="harga">Mulai dari Rp 32.000.000</p>
-   <button onclick="bukaPopup('france')">Lihat Detail</button>
-  </div>
-</div>
 
-<div class="card">
-  <img src="Italy.png" alt="Italy">
-  <div class="card-content">
-    <h1>Italy</h1>
-    <p>Jelajahi Roma, Venesia, dan Menara Pisa yang ikonik.</p>
-    <p class="harga">Mulai dari Rp 34.000.000</p>
-   <button onclick="bukaPopup('italy')">Lihat Detail</button>
-  </div>
-</div>
+  <div class="badge trending">📈 Trending</div>
 
-<div class="card">
-  <img src="turkey.png" alt="Turkey">
-  <div class="card-content">
-    <h1>Turkey</h1>
-    <p>Nikmati Cappadocia, Istanbul, dan Hagia Sophia.</p>
-    <p class="harga">Mulai dari Rp 27.000.000</p>
-    <button onclick="bukaPopup('turkey')">Lihat Detail</button>
-  </div>
-</div>
-
-<div class="card">
   <img src="thailand.png" alt="Thailand">
+
   <div class="card-content">
     <h1>Thailand</h1>
     <p>Kunjungi Bangkok, Phuket, dan Pattaya yang populer.</p>
     <p class="harga">Mulai dari Rp 18.000.000</p>
     <button onclick="bukaPopup('thailand')">Lihat Detail</button>
   </div>
+
 </div>
 
+ <!-- TIONGKOK -->
 <div class="card">
-  <img src="singapura.png" alt="Singapore">
+
+  <div class="badge trending">📈 Trending</div>
+
+  <img src="cina.png" alt="China">
+
   <div class="card-content">
-    <h1>Singapore</h1>
-    <p>Jelajahi Marina Bay Sands, Universal Studios, dan Sentosa.</p>
-    <p class="harga">Mulai dari Rp 12.000.000</p>
-    <button onclick="bukaPopup('singapore')">Lihat Detail</button>
+    <h1>Tiongkok</h1>
+    <p>Jelajahi Beijing, Tembok Besar China, dan gemerlap kota Shanghai.</p>
+    <p class="harga">Mulai dari Rp 22.000.000</p>
+    <button onclick="bukaPopup('china')">Lihat Detail</button>
   </div>
+
 </div>
 
-<!-- AMERIKA -->
+<!-- KOREA SELATAN -->
 <div class="card">
-  <img src="amrik.png" alt="America">
+
+  <div class="badge populer">⭐ Pilihan Populer</div>
+
+  <img src="korea s.png" alt="South Korea">
+
   <div class="card-content">
-    <h1>America</h1>
-    <p>Kunjungi New York, Los Angeles, dan Grand Canyon yang terkenal.</p>
-    <p class="harga">Mulai dari Rp 38.000.000</p>
-    <button onclick="bukaPopup('amerika')">Lihat Detail</button>
+    <h1>Korea Selatan</h1>
+    <p>Nikmati Seoul, Nami Island, dan budaya K-Pop yang mendunia.</p>
+    <p class="harga">Mulai dari Rp 24.000.000</p>
+    <button onclick="bukaPopup('korsel')">Lihat Detail</button>
   </div>
+
 </div>
+
+
+    <!-- JAPAN -->
+    <div class="card">
+
+  <div class="badge best">🔥 Best Seller</div>
+
+  <img src="japan.png" alt="Japan">
+
+  <div class="card-content">
+    <h1>Japan</h1>
+    <p>Nikmati keindahan Tokyo, Gunung Fuji, dan budaya tradisional Kyoto.</p>
+    <p class="harga">Mulai dari Rp 25.000.000</p>
+    <button onclick="bukaPopup('japan')">Lihat Detail</button>
+  </div>
+
+</div>
+
+ <!-- TURKI -->
+<div class="card">
+
+  <div class="badge populer">⭐ Pilihan Populer</div>
+
+  <img src="turkey.png" alt="Turkey">
+
+  <div class="card-content">
+    <h1>Turki</h1>
+    <p>Nikmati Cappadocia, Istanbul, dan Hagia Sophia.</p>
+    <p class="harga">Mulai dari Rp 27.000.000</p>
+    <button onclick="bukaPopup('turkey')">Lihat Detail</button>
+  </div>
+
+</div>
+
+<!-- AUSTRALIA -->
+<div class="card">
+
+  <div class="badge trending">📈 Trending</div>
+
+  <img src="australia.png" alt="Australia">
+
+  <div class="card-content">
+    <h1>Australia</h1>
+    <p>Eksplor Sydney Opera House, Melbourne, dan Great Barrier Reef.</p>
+    <p class="harga">Mulai dari Rp 28.000.000</p>
+    <button onclick="bukaPopup('australia')">Lihat Detail</button>
+  </div>
+
+</div>
+
+
+<!-- ARAB SAUDI -->
+<div class="card">
+
+  <div class="badge religi">🕌 Wisata Religi Populer</div>
+
+  <img src="saudi.png" alt="Saudi Arabia">
+
+  <div class="card-content">
+    <h1>Arab Saudi</h1>
+    <p>Kunjungi Makkah, Madinah, dan wisata modern kota Riyadh.</p>
+    <p class="harga">Mulai dari Rp 30.000.000</p>
+    <button onclick="bukaPopup('saudi')">Lihat Detail</button>
+  </div>
+
+</div>
+
+ <!-- PRANCIS -->
+<div class="card">
+
+  <div class="badge best">🔥 Best Seller</div>
+
+  <img src="paris.png" alt="France">
+
+  <div class="card-content">
+    <h1>Prancis</h1>
+    <p>Kunjungi Menara Eiffel, Louvre, dan kota romantis Paris.</p>
+    <p class="harga">Mulai dari Rp 32.000.000</p>
+    <button onclick="bukaPopup('france')">Lihat Detail</button>
+  </div>
+
+</div>
+
 
 <!-- INGGRIS -->
 <div class="card">
+
+  <div class="badge populer">⭐ Pilihan Populer</div>
+
   <img src="uk.png" alt="England">
+
   <div class="card-content">
-    <h1>England</h1>
+    <h1>Inggris</h1>
     <p>Jelajahi London, Big Ben, dan Istana Buckingham.</p>
     <p class="harga">Mulai dari Rp 33.000.000</p>
     <button onclick="bukaPopup('inggris')">Lihat Detail</button>
   </div>
+
 </div>
 
-<!-- RUSIA -->
+<!-- ITALIA -->
 <div class="card">
-  <img src="rs.png" alt="Russia">
+
+  <div class="badge best">🔥 Best Seller</div>
+
+  <img src="Italy.png" alt="Italy">
+
   <div class="card-content">
-    <h1>Russia</h1>
+    <h1>Italia</h1>
+    <p>Jelajahi Roma, Venesia, dan Menara Pisa yang ikonik.</p>
+    <p class="harga">Mulai dari Rp 34.000.000</p>
+    <button onclick="bukaPopup('italy')">Lihat Detail</button>
+  </div>
+
+</div>
+
+<!-- SWISSLANDIA -->
+<div class="card">
+
+  <div class="badge populer">🔥 Best Seller</div>
+
+  <img src="swiss.png" alt="Swiss">
+
+  <div class="card-content">
+    <h1>Swisslandia</h1>
+    <p>Jelajahi pegunungan Alpen, Danau Zurich, dan kota Lucerne.</p>
+    <p class="harga">Mulai dari Rp 35.000.000</p>
+    <button onclick="bukaPopup('swiss')">Lihat Detail</button>
+  </div>
+
+</div>
+
+    <!-- RUSIA -->
+<div class="card">
+
+  <div class="badge trending">📈 Trending</div>
+
+  <img src="rs.png" alt="Russia">
+
+  <div class="card-content">
+    <h1>Rusia</h1>
     <p>Kunjungi Moskow, Kremlin, dan Saint Petersburg yang megah.</p>
     <p class="harga">Mulai dari Rp 36.000.000</p>
     <button onclick="bukaPopup('rusia')">Lihat Detail</button>
   </div>
+
+</div>
+
+<!-- AMERIKA -->
+<div class="card">
+
+  <div class="badge best">⭐ Pilihan Populer</div>
+
+  <img src="amrik.png" alt="America">
+
+  <div class="card-content">
+    <h1>Amerika</h1>
+    <p>Kunjungi New York, Los Angeles, dan Grand Canyon yang terkenal.</p>
+    <p class="harga">Mulai dari Rp 38.000.000</p>
+    <button onclick="bukaPopup('amerika')">Lihat Detail</button>
+  </div>
+
+</div>
+
+   <!-- KOREA UTARA -->
+<div class="card">
+
+  <div class="badge trending">📈 Trending</div>
+
+  <img src="korea u.png" alt="North Korea">
+
+  <div class="card-content">
+    <h1>Korea Utara</h1>
+    <p>Kunjungi Pyongyang dan wisata sejarah yang unik dan eksklusif.</p>
+    <p class="harga">Mulai dari Rp 40.000.000</p>
+    <button onclick="bukaPopup('korut')">Lihat Detail</button>
+  </div>
+
 </div>
 
 <div id="popup" class="popup">
@@ -294,7 +396,7 @@
 <section id="tentang" class="tentang">
   <h1>Tentang Kami</h1>
   <p>
-    jalanyuk adalah website wisata yang membantu kamu menemukan
+    jalan yuk adalah website wisata yang membantu kamu menemukan
     destinasi negara terbaik di dunia. Website ini dibuat untuk memudahkan
     wisatawan dalam mencari informasi tempat wisata, melihat harga paket
     perjalanan, dan melakukan pemesanan dengan cepat.
@@ -380,6 +482,22 @@
   </div>
 </div>
 
+<!-- HALAMAN KERANJANG -->
+<div id="cartPage" class="cart-modal">
+  <div class="cart-container">
+    <div class="cart-header">
+      <h2>Keranjang Pesanan</h2>
+      <button class="cart-close" onclick="tutupCart()">✕</button>
+    </div>
+    <div id="cartItems" class="cart-items">
+      <!-- Items akan ditampilkan di sini -->
+    </div>
+    <div class="cart-empty" id="cartEmpty">
+      <p>Keranjang Anda kosong</p>
+    </div>
+  </div>
+</div>
+
 <script>
 window.onload = function(){
     const loader = document.getElementById("loader");
@@ -400,8 +518,8 @@ function hitungTotal(){
     let destinasi = document.getElementById("destinasiPesan").value;
 
     // harga per orang
-    let hargaDewasa = 1400000;
-    let hargaAnak = 800000;
+    let hargaDewasa = 1800000;
+    let hargaAnak = 500000;
    
     // harga destinasi
     let hargaDestinasi = 0;
@@ -491,7 +609,7 @@ window.addEventListener("scroll",()=>{
     <div class="footer-left">
       <h2>JalanYuk</h2>
       <p>
-        Website jalanyuk yang membantu kamu menemukan destinasi terbaik dunia
+        Website jalan yuk yang membantu kamu menemukan destinasi terbaik dunia
         dengan harga terjangkau dan pengalaman tak terlupakan.
       </p>
     </div>
@@ -511,21 +629,37 @@ window.addEventListener("scroll",()=>{
     <div class="footer-right">
       <h2>Kontak</h2>
       <p>📍 Indonesia</p>
-      <p>📞 +62 881 0360 29863</p>
-      <p>✉️ ultramanorb754@gmail.com</p> 
+      <a href="https://wa.me/62881036029863?text=Halo%20kak,%20saya%20tertarik%20dengan%20layanan%20travel%20di%20JalanYuk.%20Boleh%20minta%20info%20lebih%20detail%20tentang%20destinasi,%20harga,%20dan%20cara%20pemesanan?%20Terima%20kasih." target="_blank">
+  📞 +62 881 0360 29863
+      </a>
+      <p>✉️ ultramanorb754@gmail.com</p>
     </div>
 
   </div>
 
   <!-- bawah -->
   <div class="footer-bottom">
+    <div class="visitor-box">
+       👥 <span id="visitorCount">0</span> 
+       </div>
     <p>© 2026 jalanYuk | All Rights Reserved</p>
   </div>
 
+<script>
+function updateVisitor(){
+  let count = localStorage.getItem("visitorCount");
+  if(!count){
+    count = 1;
+  } else {
+    count = parseInt(count) + 1;
+  }
+  localStorage.setItem("visitorCount", count);
+  document.getElementById("visitorCount").innerText = " Pengunjung: " + count;
+}
+updateVisitor();
+</script>
   
 </footer>
-
-<div class="wave"></div>
 
 <div id="success" class="toast">
   <div class="toast-content">
@@ -584,37 +718,37 @@ sec.classList.add("show");
 <script>
 const dataDetail = {
   japan:{
-    title:"Japan",
+    title:"Jepang",
     img:"japan.png",
     desc:"Tokyo, Gunung Fuji, Kyoto, dan budaya Jepang.",
     price:"Rp 25.000.000"
   },
   swiss:{
-    title:"Swiss",
+    title:"Swisslandia",
     img:"swiss.png",
     desc:"Pegunungan Alpen dan danau indah.",
     price:"Rp 35.000.000"
   },
   saudi:{
-    title:"Saudi Arabia",
+    title:"Arab Saudi",
     img:"saudi.png",
     desc:"Kunjungi Makkah, Madinah, dan Riyadh.",
     price:"Rp 30.000.000"
   },
   china:{
-    title:"China",
+    title:"Tiongkok",
     img:"cina.png",
     desc:"Tembok Besar China dan kota Shanghai.",
     price:"Rp 22.000.000"
   },
   korsel:{
-    title:"South Korea",
+    title:"Korea Selatan",
     img:"korea s.png",
     desc:"Seoul, Nami Island, dan budaya K-Pop.",
     price:"Rp 24.000.000"
   },
   korut:{
-    title:"North Korea",
+    title:"Korea Utara",
     img:"korea u.png",
     desc:"Wisata sejarah unik di Pyongyang.",
     price:"Rp 40.000.000"
@@ -632,19 +766,19 @@ const dataDetail = {
     price:"Rp 15.000.000"
   },
   france:{
-    title:"France",
+    title:"Prancis",
     img:"paris.png",
     desc:"Menara Eiffel dan kota Paris.",
     price:"Rp 32.000.000"
   },
   italy:{
-    title:"Italy",
+    title:"Italia",
     img:"Italy.png",
     desc:"Roma, Venesia, dan Menara Pisa.",
     price:"Rp 34.000.000"
   },
   turkey:{
-    title:"Turkey",
+    title:"Turki",
     img:"turkey.png",
     desc:"Cappadocia, Istanbul, dan Hagia Sophia.",
     price:"Rp 27.000.000"
@@ -656,25 +790,25 @@ const dataDetail = {
     price:"Rp 18.000.000"
   },
   singapore:{
-    title:"Singapore",
+    title:"Singapura",
     img:"singapura.png",
     desc:"Marina Bay Sands dan Sentosa.",
     price:"Rp 12.000.000"
   },
   amerika:{
-    title:"America",
+    title:"Amerika",
     img:"amrik.png",
     desc:"New York, LA, dan Grand Canyon.",
     price:"Rp 38.000.000"
   },
   inggris:{
-    title:"England",
+    title:"Inggirs",
     img:"uk.png",
     desc:"London, Big Ben, Buckingham Palace.",
     price:"Rp 33.000.000"
   },
   rusia:{
-    title:"Russia",
+    title:"Rusia",
     img:"rs.png",
     desc:"Moskow dan Saint Petersburg.",
     price:"Rp 36.000.000"
@@ -746,11 +880,91 @@ function kirimPesan(e){
   document.getElementById("tanggalUser").innerText = tanggal;
   document.getElementById("idUser").innerText = id;
 
+  // Increment sales count
+  let salesCount = localStorage.getItem("salesCount") || 0;
+  salesCount = parseInt(salesCount) + 1;
+  localStorage.setItem("salesCount", salesCount);
+  updateCartIcon();
+
+  // Simpan pesanan ke localStorage
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  orders.push({
+    id: id,
+    destinasi: destText,
+    total: total,
+    tanggal: tanggal,
+    waktuOrder: new Date().toLocaleTimeString("id-ID")
+  });
+  localStorage.setItem("orders", JSON.stringify(orders));
+
   document.getElementById("popupSukses").style.display = "flex";
 }
 
 function tutupSukses(){
   document.getElementById("popupSukses").style.display = "none";
+}
+
+// Fungsi untuk membuka halaman keranjang
+function bukaCart(){
+  tampilkanPesanan();
+  // Sinkronisasi sales count dengan jumlah orders
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  localStorage.setItem("salesCount", orders.length);
+  updateCartIcon();
+  document.getElementById("cartPage").style.display = "flex";
+}
+
+// Fungsi untuk menutup halaman keranjang
+function tutupCart(){
+  document.getElementById("cartPage").style.display = "none";
+}
+
+// Fungsi untuk menampilkan pesanan di keranjang
+function tampilkanPesanan(){
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  let cartItemsDiv = document.getElementById("cartItems");
+  let cartEmptyDiv = document.getElementById("cartEmpty");
+
+  if(orders.length === 0){
+    cartItemsDiv.innerHTML = "";
+    cartEmptyDiv.style.display = "block";
+  } else {
+    cartEmptyDiv.style.display = "none";
+    cartItemsDiv.innerHTML = "";
+
+    orders.forEach((order, index) => {
+      let orderHTML = `
+        <div class="cart-item">
+          <div class="cart-item-header">
+            <h3>${order.destinasi}</h3>
+            <button class="cart-item-delete" onclick="hapusPesanan(${index})">🗑️ Hapus</button>
+          </div>
+          <div class="cart-item-details">
+            <p><strong>ID Pesanan:</strong> ${order.id}</p>
+            <p><strong>Tanggal:</strong> ${order.tanggal}</p>
+            <p><strong>Waktu Order:</strong> ${order.waktuOrder}</p>
+            <p><strong>Total:</strong> ${order.total}</p>
+          </div>
+        </div>
+      `;
+      cartItemsDiv.innerHTML += orderHTML;
+    });
+  }
+}
+
+// Fungsi untuk menghapus pesanan
+function hapusPesanan(index){
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  orders.splice(index, 1);
+  localStorage.setItem("orders", JSON.stringify(orders));
+  
+  // Update sales count
+  let salesCount = localStorage.getItem("salesCount") || 0;
+  salesCount = Math.max(0, parseInt(salesCount) - 1);
+  localStorage.setItem("salesCount", salesCount);
+  updateCartIcon();
+  
+  tampilkanPesanan();
 }
 
 </script>
