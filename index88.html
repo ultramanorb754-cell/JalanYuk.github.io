@@ -88,16 +88,158 @@ function updateDestinationSalesCount() {
   });
 }
 
+const destinationLabels = {
+  singapore: "Singapura",
+  indonesia: "Indonesia",
+  thailand: "Thailand",
+  china: "Tiongkok",
+  saudi: "Arab Saudi",
+  korsel: "Korea Selatan",
+  korut: "Korea Utara",
+  australia: "Australia",
+  france: "Prancis",
+  italy: "Italia",
+  turkey: "Turki",
+  amerika: "Amerika",
+  inggris: "Inggris",
+  rusia: "Rusia",
+  japan: "Jepang",
+  swiss: "Swisslandia"
+};
+
+function getSalesData() {
+  const orders = getStoredOrders();
+  const summary = {};
+
+  Object.entries(destinationLabels).forEach(([key, label]) => {
+    summary[key] = {
+      name: label,
+      orders: 0,
+      dewasa: 0,
+      anak: 0
+    };
+  });
+
+  orders.forEach(order => {
+    const key = order.destKey || getDestinationKey(order.destinasi);
+    if (!key || !summary[key]) return;
+    summary[key].orders += 1;
+    summary[key].dewasa += order.dewasa || 0;
+    summary[key].anak += order.anak || 0;
+  });
+
+  return summary;
+}
+
+function renderSalesDiagram() {
+  const chartContainer = document.getElementById("salesChart");
+  const totalOrdersElement = document.getElementById("totalOrders");
+  const totalDestinationsElement = document.getElementById("totalDestinations");
+  if (!chartContainer || !totalOrdersElement || !totalDestinationsElement) return;
+
+  const salesData = getSalesData();
+  const entries = Object.values(salesData).sort((a, b) => b.orders - a.orders);
+  const maxOrders = Math.max(1, ...entries.map(item => item.orders));
+  const totalOrders = entries.reduce((sum, item) => sum + item.orders, 0);
+
+  chartContainer.innerHTML = entries.map(item => {
+    const width = maxOrders === 0 ? 0 : Math.round((item.orders / maxOrders) * 100);
+    return `
+      <div class="chart-item">
+        <div class="chart-label">
+          <span>${item.name}</span>
+          <strong>${item.orders}</strong>
+        </div>
+        <div class="chart-bar">
+          <div class="bar-fill" style="width:${width}%;"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  totalOrdersElement.innerText = totalOrders;
+  totalDestinationsElement.innerText = entries.filter(item => item.orders > 0).length;
+}
+
+function getDestinationPrice(destKey) {
+  const prices = {
+    japan: 25000000,
+    swiss: 35000000,
+    saudi: 30000000,
+    china: 22000000,
+    korsel: 24000000,
+    korut: 40000000,
+    australia: 28000000,
+    indonesia: 15000000,
+    france: 32000000,
+    italy: 34000000,
+    turkey: 27000000,
+    thailand: 18000000,
+    singapore: 12000000,
+    amerika: 38000000,
+    inggris: 33000000,
+    rusia: 36000000
+  };
+  return prices[destKey] || 0;
+}
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomDate(daysBack = 30) {
+  const date = new Date();
+  date.setDate(date.getDate() - getRandomInt(0, daysBack));
+  return date;
+}
+
+function seedRandomOrders() {
+  const orders = getStoredOrders();
+  if (orders.length > 0 || localStorage.getItem("ordersSeeded") === "true") return;
+
+  const sampleKeys = Object.keys(destinationLabels);
+
+  const seededOrders = sampleKeys.flatMap(destKey => {
+    const orderCount = getRandomInt(1, 5);
+    return Array.from({ length: orderCount }, () => {
+      const dewasa = getRandomInt(1, 5);
+      const anak = getRandomInt(0, 3);
+      const destPrice = getDestinationPrice(destKey);
+      const totalOrang = dewasa * 1800000 + anak * 500000;
+      const total = destPrice + totalOrang;
+      const now = getRandomDate(30);
+      return {
+        id: "TRX" + Math.floor(Math.random() * 1000000),
+        destinasi: destinationLabels[destKey] || destKey,
+        destKey,
+        total: "Rp " + total.toLocaleString("id-ID"),
+        tanggal: now.toLocaleDateString("id-ID"),
+        waktuOrder: now.toLocaleTimeString("id-ID"),
+        dewasa,
+        anak
+      };
+    });
+  });
+
+  localStorage.setItem("orders", JSON.stringify(seededOrders));
+  localStorage.setItem("ordersSeeded", "true");
+}
+
 function updateCartIcon() {
   const orders = getStoredOrders();
   const salesCount = orders.length;
   localStorage.setItem("salesCount", salesCount);
   document.getElementById("cartCount").innerText = salesCount;
   updateDestinationSalesCount();
+  renderSalesDiagram();
 }
 
 // Update cart icon saat page load
-document.addEventListener("DOMContentLoaded", updateCartIcon);
+document.addEventListener("DOMContentLoaded", () => {
+  seedRandomOrders();
+  updateCartIcon();
+  renderSalesDiagram();
+});
 </script>
 </head>
 
@@ -109,6 +251,7 @@ document.addEventListener("DOMContentLoaded", updateCartIcon);
     <ul>
 <li><a href="#home">Beranda</a></li>
 <li><a href="#destinasi">Destinasi</a></li>
+<li><a href="#diagram">Diagram</a></li>
 <li><a href="#tentang">Tentang</a></li>
 <li><a href="#kontak">Kontak</a></li>
     </ul>
@@ -488,6 +631,28 @@ document.addEventListener("DOMContentLoaded", updateCartIcon);
 
 </section>
 
+<section id="diagram" class="diagram">
+  <h1>Diagram Penjualan Per Destinasi</h1>
+  <p>Lihat statistik pesanan berdasarkan destinasi dan jumlah penumpang.</p>
+
+  <div class="diagram-summary">
+    <div class="summary-card">
+      <h2 id="totalDestinations">0</h2>
+      <p>Destinasi Terdata</p>
+    </div>
+    <div class="summary-card">
+      <h2 id="totalOrders">0</h2>
+      <p>Total Order</p>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <div class="chart-grid" id="salesChart"></div>
+  </div>
+
+  <p class="diagram-note">Data diambil dari order yang tersimpan di keranjang. Diagram akan memperbarui otomatis setiap kali kamu melakukan pemesanan atau menghapus pesanan.</p>
+</section>
+
 <section id="tentang" class="tentang">
   <h1>Tentang Kami</h1>
   <p>
@@ -679,16 +844,6 @@ function hitungTotal(){
 
     document.getElementById("totalHarga").innerText =
     "Total: Rp" + totalKeseluruhan.toLocaleString("id-ID");
-}
-
-/* POPUP */
-function kirimPesan(e){
-    e.preventDefault();
-    document.getElementById("success").style.display="block";
-
-    setTimeout(()=>{
-        document.getElementById("success").style.display="none";
-    },3000);
 }
 
 /* SCROLL ANIMATION */
@@ -961,6 +1116,7 @@ function kirimPesan(e){
 
   updateCartIcon();
   updateDestinationSalesCount();
+  renderSalesDiagram();
 
   document.getElementById("popupSukses").style.display = "flex";
 }
@@ -976,6 +1132,7 @@ function bukaCart(){
   let orders = JSON.parse(localStorage.getItem("orders")) || [];
   localStorage.setItem("salesCount", orders.length);
   updateCartIcon();
+  renderSalesDiagram();
   document.getElementById("cartPage").style.display = "flex";
 }
 
