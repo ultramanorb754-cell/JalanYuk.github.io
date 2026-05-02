@@ -77,7 +77,8 @@ function updateDestinationSalesCount() {
     const count = counts[destKey] || 0;
     const detail = details[destKey] || { totalDewasa: 0, totalAnak: 0 };
     if (count > 0) {
-      soldBadge.innerText = `Terjual ${count}\nDewasa: ${detail.totalDewasa}\nAnak: ${detail.totalAnak}`;
+      const totalTerjual = detail.totalDewasa + detail.totalAnak;
+      soldBadge.innerText = `Dewasa ${detail.totalDewasa}\nAnak ${detail.totalAnak}\nTerjual ${totalTerjual}`;
       soldBadge.style.whiteSpace = "pre-line";
     } else {
       soldBadge.innerText = "Terjual 0";
