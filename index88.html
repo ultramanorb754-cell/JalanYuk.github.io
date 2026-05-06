@@ -1,1204 +1,1436 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zaka web travel</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zaka web travel</title>
+  <link rel="stylesheet" href="style.css?v=2">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
-<style>
+  <style>
 
-</style>
+  </style>
 
-<script>
-function getDestinationKey(name) {
-  if (!name) return "";
-  const key = name.toString().trim().toLowerCase();
-  const map = {
-    "singapore": "singapore",
-    "singapura": "singapore",
-    "indonesia": "indonesia",
-    "thailand": "thailand",
-    "china": "china",
-    "tiongkok": "china",
-    "arab saudi": "saudi",
-    "saudi arabia": "saudi",
-    "korea selatan": "korsel",
-    "korea utara": "korut",
-    "australia": "australia",
-    "france": "france",
-    "italy": "italy",
-    "turkey": "turkey",
-    "america": "amerika",
-    "amerika": "amerika",
-    "england": "inggris",
-    "inggris": "inggris",
-    "russia": "rusia",
-    "rusia": "rusia"
-  };
-  return map[key] || "";
-}
-
-function getStoredOrders() {
-  return JSON.parse(localStorage.getItem("orders")) || [];
-}
-
-function updateDestinationSalesCount() {
-  const orders = getStoredOrders();
-  const counts = {};
-  const details = {};
-
-  orders.forEach(order => {
-    const key = order.destKey || getDestinationKey(order.destinasi);
-    if (!key) return;
-    counts[key] = (counts[key] || 0) + 1;
-    
-    if (!details[key]) {
-      details[key] = { totalDewasa: 0, totalAnak: 0 };
-    }
-    details[key].totalDewasa += order.dewasa || 0;
-    details[key].totalAnak += order.anak || 0;
-  });
-
-  const popupButtons = document.querySelectorAll("button[onclick^='bukaPopup']");
-  popupButtons.forEach(button => {
-    const match = button.getAttribute("onclick").match(/bukaPopup\('(.+?)'\)/);
-    if (!match) return;
-    const destKey = match[1];
-    let soldBadge = button.parentElement.querySelector(".sold-badge");
-    if (!soldBadge) {
-      soldBadge = document.createElement("div");
-      soldBadge.className = "sold-badge";
-      soldBadge.id = `sold-${destKey}`;
-      button.parentElement.insertBefore(soldBadge, button);
-    }
-    const count = counts[destKey] || 0;
-    const detail = details[destKey] || { totalDewasa: 0, totalAnak: 0 };
-    if (count > 0) {
-      const totalTerjual = detail.totalDewasa + detail.totalAnak;
-      soldBadge.innerText = `Dewasa ${detail.totalDewasa}\nAnak ${detail.totalAnak}\nTerjual ${totalTerjual}`;
-      soldBadge.style.whiteSpace = "pre-line";
-    } else {
-      soldBadge.innerText = "Terjual 0";
-      soldBadge.style.whiteSpace = "normal";
-    }
-    soldBadge.style.opacity = count > 0 ? "1" : "0.55";
-  });
-}
-
-const destinationLabels = {
-  singapore: "Singapura",
-  indonesia: "Indonesia",
-  thailand: "Thailand",
-  china: "Tiongkok",
-  saudi: "Arab Saudi",
-  korsel: "Korea Selatan",
-  korut: "Korea Utara",
-  australia: "Australia",
-  france: "Prancis",
-  italy: "Italia",
-  turkey: "Turki",
-  amerika: "Amerika",
-  inggris: "Inggris",
-  rusia: "Rusia",
-  japan: "Jepang",
-  swiss: "Swisslandia"
-};
-
-function getSalesData() {
-  const orders = getStoredOrders();
-  const summary = {};
-
-  Object.entries(destinationLabels).forEach(([key, label]) => {
-    summary[key] = {
-      name: label,
-      orders: 0,
-      dewasa: 0,
-      anak: 0
-    };
-  });
-
-  orders.forEach(order => {
-    const key = order.destKey || getDestinationKey(order.destinasi);
-    if (!key || !summary[key]) return;
-    summary[key].orders += 1;
-    summary[key].dewasa += order.dewasa || 0;
-    summary[key].anak += order.anak || 0;
-  });
-
-  return summary;
-}
-
-function renderSalesDiagram() {
-  const chartContainer = document.getElementById("salesChart");
-  const totalOrdersElement = document.getElementById("totalOrders");
-  const totalDestinationsElement = document.getElementById("totalDestinations");
-  if (!chartContainer || !totalOrdersElement || !totalDestinationsElement) return;
-
-  const salesData = getSalesData();
-  const entries = Object.values(salesData).sort((a, b) => b.orders - a.orders);
-  const maxOrders = Math.max(1, ...entries.map(item => item.orders));
-  const totalOrders = entries.reduce((sum, item) => sum + item.orders, 0);
-
-  chartContainer.innerHTML = entries.map(item => {
-    const width = maxOrders === 0 ? 0 : Math.round((item.orders / maxOrders) * 100);
-    return `
-      <div class="chart-item">
-        <div class="chart-label">
-          <span>${item.name}</span>
-          <strong>${item.orders}</strong>
-        </div>
-        <div class="chart-bar">
-          <div class="bar-fill" style="width:${width}%;"></div>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  totalOrdersElement.innerText = totalOrders;
-  totalDestinationsElement.innerText = entries.filter(item => item.orders > 0).length;
-}
-
-function getDestinationPrice(destKey) {
-  const prices = {
-    japan: 25000000,
-    swiss: 35000000,
-    saudi: 30000000,
-    china: 22000000,
-    korsel: 24000000,
-    korut: 40000000,
-    australia: 28000000,
-    indonesia: 15000000,
-    france: 32000000,
-    italy: 34000000,
-    turkey: 27000000,
-    thailand: 18000000,
-    singapore: 12000000,
-    amerika: 38000000,
-    inggris: 33000000,
-    rusia: 36000000
-  };
-  return prices[destKey] || 0;
-}
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function getRandomDate(daysBack = 30) {
-  const date = new Date();
-  date.setDate(date.getDate() - getRandomInt(0, daysBack));
-  return date;
-}
-
-function seedRandomOrders() {
-  const orders = getStoredOrders();
-  if (orders.length > 0 || localStorage.getItem("ordersSeeded") === "true") return;
-
-  const sampleKeys = Object.keys(destinationLabels);
-
-  const seededOrders = sampleKeys.flatMap(destKey => {
-    const orderCount = getRandomInt(1, 5);
-    return Array.from({ length: orderCount }, () => {
-      const dewasa = getRandomInt(1, 5);
-      const anak = getRandomInt(0, 3);
-      const destPrice = getDestinationPrice(destKey);
-      const totalOrang = dewasa * 1800000 + anak * 500000;
-      const total = destPrice + totalOrang;
-      const now = getRandomDate(30);
-      return {
-        id: "TRX" + Math.floor(Math.random() * 1000000),
-        destinasi: destinationLabels[destKey] || destKey,
-        destKey,
-        total: "Rp " + total.toLocaleString("id-ID"),
-        tanggal: now.toLocaleDateString("id-ID"),
-        waktuOrder: now.toLocaleTimeString("id-ID"),
-        dewasa,
-        anak
+  <script>
+    function getDestinationKey(name) {
+      if (!name) return "";
+      const key = name.toString().trim().toLowerCase();
+      const map = {
+        "singapore": "singapore",
+        "singapura": "singapore",
+        "indonesia": "indonesia",
+        "thailand": "thailand",
+        "china": "china",
+        "tiongkok": "china",
+        "arab saudi": "saudi",
+        "saudi arabia": "saudi",
+        "korea selatan": "korsel",
+        "korea utara": "korut",
+        "australia": "australia",
+        "france": "france",
+        "italy": "italy",
+        "turkey": "turkey",
+        "america": "amerika",
+        "amerika": "amerika",
+        "england": "inggris",
+        "inggris": "inggris",
+        "russia": "rusia",
+        "rusia": "rusia"
       };
+      return map[key] || "";
+    }
+
+    function getStoredOrders() {
+      return JSON.parse(localStorage.getItem("orders")) || [];
+    }
+
+    function updateDestinationSalesCount() {
+      const orders = getStoredOrders();
+      const counts = {};
+      const details = {};
+
+      orders.forEach(order => {
+        const key = order.destKey || getDestinationKey(order.destinasi);
+        if (!key) return;
+        counts[key] = (counts[key] || 0) + 1;
+
+        if (!details[key]) {
+          details[key] = { totalDewasa: 0, totalAnak: 0 };
+        }
+        details[key].totalDewasa += order.dewasa || 0;
+        details[key].totalAnak += order.anak || 0;
+      });
+
+      const popupButtons = document.querySelectorAll("button[onclick^='bukaPopup']");
+      popupButtons.forEach(button => {
+        const match = button.getAttribute("onclick").match(/bukaPopup\('(.+?)'\)/);
+        if (!match) return;
+        const destKey = match[1];
+        let soldBadge = button.parentElement.querySelector(".sold-badge");
+        if (!soldBadge) {
+          soldBadge = document.createElement("div");
+          soldBadge.className = "sold-badge";
+          soldBadge.id = `sold-${destKey}`;
+          button.parentElement.insertBefore(soldBadge, button);
+        }
+        const count = counts[destKey] || 0;
+        const detail = details[destKey] || { totalDewasa: 0, totalAnak: 0 };
+        if (count > 0) {
+          const totalTerjual = detail.totalDewasa + detail.totalAnak;
+          soldBadge.innerText = `Dewasa ${detail.totalDewasa}\nAnak ${detail.totalAnak}\nTerjual ${totalTerjual}`;
+          soldBadge.style.whiteSpace = "pre-line";
+        } else {
+          soldBadge.innerText = "Terjual 0";
+          soldBadge.style.whiteSpace = "normal";
+        }
+        soldBadge.style.opacity = count > 0 ? "1" : "0.55";
+      });
+    }
+
+    const destinationLabels = {
+      singapore: "Singapura",
+      indonesia: "Indonesia",
+      thailand: "Thailand",
+      china: "Tiongkok",
+      saudi: "Arab Saudi",
+      korsel: "Korea Selatan",
+      korut: "Korea Utara",
+      australia: "Australia",
+      france: "Prancis",
+      italy: "Italia",
+      turkey: "Turki",
+      amerika: "Amerika",
+      inggris: "Inggris",
+      rusia: "Rusia",
+      japan: "Jepang",
+      swiss: "Swisslandia"
+    };
+
+    function getDestinationPrice(destKey) {
+      const prices = {
+        japan: 25000000,
+        swiss: 35000000,
+        saudi: 30000000,
+        china: 22000000,
+        korsel: 24000000,
+        korut: 40000000,
+        australia: 28000000,
+        indonesia: 15000000,
+        france: 32000000,
+        italy: 34000000,
+        turkey: 27000000,
+        thailand: 18000000,
+        singapore: 12000000,
+        amerika: 38000000,
+        inggris: 33000000,
+        rusia: 36000000
+      };
+      return prices[destKey] || 0;
+    }
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomDate(daysBack = 30) {
+      const date = new Date();
+      date.setDate(date.getDate() - getRandomInt(0, daysBack));
+      return date;
+    }
+
+    function seedRandomOrders() {
+      const orders = getStoredOrders();
+      if (orders.length > 0 || localStorage.getItem("ordersSeeded") === "true") return;
+
+      const sampleKeys = Object.keys(destinationLabels);
+
+      const seededOrders = sampleKeys.flatMap(destKey => {
+        const orderCount = getRandomInt(1, 5);
+        return Array.from({ length: orderCount }, () => {
+          const dewasa = getRandomInt(1, 5);
+          const anak = getRandomInt(0, 3);
+          const destPrice = getDestinationPrice(destKey);
+          const totalOrang = dewasa * 1800000 + anak * 500000;
+          const total = destPrice + totalOrang;
+          const now = getRandomDate(30);
+          return {
+            id: "TRX" + Math.floor(Math.random() * 1000000),
+            destinasi: destinationLabels[destKey] || destKey,
+            destKey,
+            total: "Rp " + total.toLocaleString("id-ID"),
+            tanggal: now.toLocaleDateString("id-ID"),
+            waktuOrder: now.toLocaleTimeString("id-ID"),
+            dewasa,
+            anak
+          };
+        });
+      });
+
+      localStorage.setItem("orders", JSON.stringify(seededOrders));
+      localStorage.setItem("ordersSeeded", "true");
+    }
+
+    function updateCartIcon() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      document.getElementById("cartCount").innerText = cart.length;
+      updateDestinationSalesCount();
+      updateStatistics();
+    }
+
+    // Update cart icon saat page load
+    document.addEventListener("DOMContentLoaded", () => {
+      seedRandomOrders();
+      updateCartIcon();
     });
-  });
-
-  localStorage.setItem("orders", JSON.stringify(seededOrders));
-  localStorage.setItem("ordersSeeded", "true");
-}
-
-function updateCartIcon() {
-  const orders = getStoredOrders();
-  const salesCount = orders.length;
-  localStorage.setItem("salesCount", salesCount);
-  document.getElementById("cartCount").innerText = salesCount;
-  updateDestinationSalesCount();
-  renderSalesDiagram();
-}
-
-// Update cart icon saat page load
-document.addEventListener("DOMContentLoaded", () => {
-  seedRandomOrders();
-  updateCartIcon();
-  renderSalesDiagram();
-});
-</script>
+  </script>
 </head>
+
 
 <body>
 
-<nav>
+  <nav>
     <h1>JALAN YUK</h1>
 
     <ul>
-<li><a href="#home">Beranda</a></li>
-<li><a href="#destinasi">Destinasi</a></li>
-<li><a href="#diagram">Diagram</a></li>
-<li><a href="#tentang">Tentang</a></li>
-<li><a href="#kontak">Kontak</a></li>
+      <li><a href="#home">Beranda</a></li>
+      <li><a href="#destinasi">Destinasi</a></li>
+      <li><a href="#statistik">Statistik</a></li>
+      <li><a href="#tentang">Tentang</a></li>
+      <li><a href="#kontak">Kontak</a></li>
     </ul>
 
     <div class="nav-right">
-         <button class="cart-icon-wrapper" onclick="bukaCart()" aria-label="Buka keranjang">
-             <span class="cart-icon">🛒</span>
-             <span id="cartCount" class="cart-badge">0</span>
-         </button>
-         <button class="nav-btn toggle-btn" onclick="toggleDark()">Mode Gelap</button>
+      <button class="cart-icon-wrapper" onclick="bukaCart()" aria-label="Buka keranjang">
+        <span class="cart-icon">🛒</span>
+        <span id="cartCount" class="cart-badge">0</span>
+      </button>
+      <button class="nav-btn toggle-btn" onclick="toggleDark()">Mode Gelap</button>
     </div>
-</nav>
+  </nav>
 
-<header id="home" class="hero">
+  <div class="page-wrapper">
+    <header id="home" class="hero">
 
-  <div class="slider">
+      <div class="slider">
 
-    <div class="slide active">
-      <img src="japan.png" alt="Japan">
-      <div class="overlay"></div>
-      <div class="slide-content">
-        <h1>Jepang</h1>
+        <div class="slide active">
+          <img src="japan.png" alt="Japan">
+          <div class="overlay"></div>
+          <div class="slide-content">
+            <h1>Jepang</h1>
+            <p>
+              Nikmati Tokyo, Gunung Fuji, Kyoto, dan budaya tradisional Jepang
+              yang memadukan sejarah dengan modernitas.
+            </p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <img src="swiss.png" alt="Swiss">
+          <div class="overlay"></div>
+          <div class="slide-content">
+            <h1>Swisslandia</h1>
+            <p>
+              Jelajahi pegunungan Alpen, danau yang jernih,
+              dan kota romantis dengan pemandangan indah.
+            </p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <img src="saudi.png" alt="Saudi Arabia">
+          <div class="overlay"></div>
+          <div class="slide-content">
+            <h1>Arab Saudi</h1>
+            <p>
+              Kunjungi Makkah, Madinah, dan Riyadh untuk wisata religi
+              dan pengalaman modern yang mewah.
+            </p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <img src="australia.png" alt="Australia">
+          <div class="overlay"></div>
+          <div class="slide-content">
+            <h1>Australia</h1>
+            <p>
+              Nikmati Sydney Opera House, Melbourne,
+              dan Great Barrier Reef yang terkenal di dunia.
+            </p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <img src="bali.png" alt="Indonesia">
+          <div class="overlay"></div>
+          <div class="slide-content">
+            <h1>Indonesia</h1>
+            <p>
+              Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <section id="destinasi" class="destinasi">
+      <h1>Destinasi Premium</h1>
+
+      <div class="card-container">
+
+        <!-- SINGAPURA -->
+        <div class="card">
+
+          <div class="badge best">🔥 Best Seller</div>
+
+          <img src="singapura.png" alt="Singapore">
+
+          <div class="card-content">
+            <h1>Singapura</h1>
+            <p>Jelajahi Marina Bay Sands, Universal Studios, dan Sentosa.</p>
+            <p class="harga">Mulai dari Rp 12.000.000</p>
+            <div class="sold-badge" id="sold-singapore">Terjual 0</div>
+            <button onclick="bukaPopup('singapore')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- INDONESIA -->
+        <div class="card">
+
+          <div class="badge populer">⭐ Pilihan Populer</div>
+
+          <img src="bali.png" alt="Indonesia">
+
+          <div class="card-content">
+            <h1>Indonesia</h1>
+            <p>Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot.</p>
+            <p class="harga">Mulai dari Rp 15.000.000</p>
+            <div class="sold-badge" id="sold-indonesia">Terjual 0</div>
+            <button onclick="bukaPopup('indonesia')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- THAILAND -->
+        <div class="card">
+
+          <div class="badge trending">📈 Trending</div>
+
+          <img src="thailand.png" alt="Thailand">
+
+          <div class="card-content">
+            <h1>Thailand</h1>
+            <p>Kunjungi Bangkok, Phuket, dan Pattaya yang populer.</p>
+            <p class="harga">Mulai dari Rp 18.000.000</p>
+            <div class="sold-badge" id="sold-thailand">Terjual 0</div>
+            <button onclick="bukaPopup('thailand')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- TIONGKOK -->
+        <div class="card">
+
+          <div class="badge trending">📈 Trending</div>
+
+          <img src="cina.png" alt="China">
+
+          <div class="card-content">
+            <h1>Tiongkok</h1>
+            <p>Jelajahi Beijing, Tembok Besar China, dan gemerlap kota Shanghai.</p>
+            <p class="harga">Mulai dari Rp 22.000.000</p>
+            <div class="sold-badge" id="sold-china">Terjual 0</div>
+            <button onclick="bukaPopup('china')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- KOREA SELATAN -->
+        <div class="card">
+
+          <div class="badge populer">⭐ Pilihan Populer</div>
+
+          <img src="korea s.png" alt="South Korea">
+
+          <div class="card-content">
+            <h1>Korea Selatan</h1>
+            <p>Nikmati Seoul, Nami Island, dan budaya K-Pop yang mendunia.</p>
+            <p class="harga">Mulai dari Rp 24.000.000</p>
+            <div class="sold-badge" id="sold-korsel">Terjual 0</div>
+            <button onclick="bukaPopup('korsel')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+
+        <!-- JAPAN -->
+        <div class="card">
+
+          <div class="badge best">🔥 Best Seller</div>
+
+          <img src="japan.png" alt="Japan">
+
+          <div class="card-content">
+            <h1>Japan</h1>
+            <p>Nikmati keindahan Tokyo, Gunung Fuji, dan budaya tradisional Kyoto.</p>
+            <p class="harga">Mulai dari Rp 25.000.000</p>
+            <div class="sold-badge" id="sold-japan">Terjual 0</div>
+            <button onclick="bukaPopup('japan')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- TURKI -->
+        <div class="card">
+
+          <div class="badge populer">⭐ Pilihan Populer</div>
+
+          <img src="turkey.png" alt="Turkey">
+
+          <div class="card-content">
+            <h1>Turki</h1>
+            <p>Nikmati Cappadocia, Istanbul, dan Hagia Sophia.</p>
+            <p class="harga">Mulai dari Rp 27.000.000</p>
+            <div class="sold-badge" id="sold-turkey">Terjual 0</div>
+            <button onclick="bukaPopup('turkey')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- AUSTRALIA -->
+        <div class="card">
+
+          <div class="badge trending">📈 Trending</div>
+
+          <img src="australia.png" alt="Australia">
+
+          <div class="card-content">
+            <h1>Australia</h1>
+            <p>Eksplor Sydney Opera House, Melbourne, dan Great Barrier Reef.</p>
+            <p class="harga">Mulai dari Rp 28.000.000</p>
+            <div class="sold-badge" id="sold-australia">Terjual 0</div>
+            <button onclick="bukaPopup('australia')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+
+        <!-- ARAB SAUDI -->
+        <div class="card">
+
+          <div class="badge religi">🕌 Wisata Religi Populer</div>
+
+          <img src="saudi.png" alt="Saudi Arabia">
+
+          <div class="card-content">
+            <h1>Arab Saudi</h1>
+            <p>Kunjungi Makkah, Madinah, dan wisata modern kota Riyadh.</p>
+            <p class="harga">Mulai dari Rp 30.000.000</p>
+            <div class="sold-badge" id="sold-saudi">Terjual 0</div>
+            <button onclick="bukaPopup('saudi')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- PRANCIS -->
+        <div class="card">
+
+          <div class="badge best">🔥 Best Seller</div>
+
+          <img src="paris.png" alt="France">
+
+          <div class="card-content">
+            <h1>Prancis</h1>
+            <p>Kunjungi Menara Eiffel, Louvre, dan kota romantis Paris.</p>
+            <p class="harga">Mulai dari Rp 32.000.000</p>
+            <div class="sold-badge" id="sold-france">Terjual 0</div>
+            <button onclick="bukaPopup('france')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+
+        <!-- INGGRIS -->
+        <div class="card">
+
+          <div class="badge populer">⭐ Pilihan Populer</div>
+
+          <img src="uk.png" alt="England">
+
+          <div class="card-content">
+            <h1>Inggris</h1>
+            <p>Jelajahi London, Big Ben, dan Istana Buckingham.</p>
+            <p class="harga">Mulai dari Rp 33.000.000</p>
+            <div class="sold-badge" id="sold-inggris">Terjual 0</div>
+            <button onclick="bukaPopup('inggris')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- ITALIA -->
+        <div class="card">
+
+          <div class="badge best">🔥 Best Seller</div>
+
+          <img src="Italy.png" alt="Italy">
+
+          <div class="card-content">
+            <h1>Italia</h1>
+            <p>Jelajahi Roma, Venesia, dan Menara Pisa yang ikonik.</p>
+            <p class="harga">Mulai dari Rp 34.000.000</p>
+            <div class="sold-badge" id="sold-italy">Terjual 0</div>
+            <button onclick="bukaPopup('italy')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- SWISSLANDIA -->
+        <div class="card">
+
+          <div class="badge populer">🔥 Best Seller</div>
+
+          <img src="swiss.png" alt="Swiss">
+
+          <div class="card-content">
+            <h1>Swisslandia</h1>
+            <p>Jelajahi pegunungan Alpen, Danau Zurich, dan kota Lucerne.</p>
+            <p class="harga">Mulai dari Rp 35.000.000</p>
+            <div class="sold-badge" id="sold-swiss">Terjual 0</div>
+            <button onclick="bukaPopup('swiss')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- RUSIA -->
+        <div class="card">
+
+          <div class="badge trending">📈 Trending</div>
+
+          <img src="rs.png" alt="Russia">
+
+          <div class="card-content">
+            <h1>Rusia</h1>
+            <p>Kunjungi Moskow, Kremlin, dan Saint Petersburg yang megah.</p>
+            <p class="harga">Mulai dari Rp 36.000.000</p>
+            <div class="sold-badge" id="sold-rusia">Terjual 0</div>
+            <button onclick="bukaPopup('rusia')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- AMERIKA -->
+        <div class="card">
+
+          <div class="badge best">⭐ Pilihan Populer</div>
+
+          <img src="amrik.png" alt="America">
+
+          <div class="card-content">
+            <h1>Amerika</h1>
+            <p>Kunjungi New York, Los Angeles, dan Grand Canyon yang terkenal.</p>
+            <p class="harga">Mulai dari Rp 38.000.000</p>
+            <div class="sold-badge" id="sold-amerika">Terjual 0</div>
+            <button onclick="bukaPopup('amerika')">Lihat Detail</button>
+          </div>
+
+        </div>
+
+        <!-- KOREA UTARA -->
+        <div class="card">
+
+          <div class="badge trending">📈 Trending</div>
+
+          <img src="korea u.png" alt="North Korea">
+
+          <div class="card-content">
+            <h1>Korea Utara</h1>
+            <p>Kunjungi Pyongyang dan wisata sejarah yang unik dan eksklusif.</p>
+            <p class="harga">Mulai dari Rp 40.000.000</p>
+            <div class="sold-badge" id="sold-korut">Terjual 0</div>
+            <button onclick="bukaPopup('korut')">Lihat Detail</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <section id="tentang" class="tentang">
+      <div class="tentang-container">
+
+        <h1 class="tentang-title">Tentang Kami</h1>
+
+        <p class="tentang-desc">
+          <strong>JALAN YUK</strong> adalah platform travel yang membantu kamu
+          menemukan destinasi terbaik di dunia dengan mudah, cepat, dan praktis.
+        </p>
+
+        <div class="tentang-grid">
+
+          <div class="tentang-card">
+            <h3>🌍 Banyak Destinasi</h3>
+            <p>Kami menyediakan berbagai pilihan negara populer seperti Jepang, Indonesia, Inggris, dan lainnya.</p>
+          </div>
+
+          <div class="tentang-card">
+            <h3>💰 Harga Terjangkau</h3>
+            <p>Paket wisata dengan harga terbaik dan transparan tanpa biaya tersembunyi.</p>
+          </div>
+
+          <div class="tentang-card">
+            <h3>⚡ Pemesanan Cepat</h3>
+            <p>Booking hanya dalam beberapa klik tanpa ribet dan langsung diproses.</p>
+          </div>
+
+        </div>
+
+        <p class="tentang-footer">
+          Dengan <strong>Jalan Yuk</strong>, liburan kamu jadi lebih mudah,
+          menyenangkan, dan berkesan.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- STATISTIK -->
+    <section id="statistik" class="statistik">
+      <div class="statistik-container">
+        <h1>Statistik Penjualan</h1>
+        <p>Data penjualan paket travel kami</p>
+
+        <div class="statistik-summary">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <h3 id="totalOrders">0</h3>
+            <p>Total Pesanan</p>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">��</div>
+            <h3 id="totalRevenue">Rp 0</h3>
+            <p>Total Pendapatan</p>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <h3 id="topDestination">-</h3>
+            <p>Destinasi Terlaris</p>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <h2>Ranking Destinasi (Dewasa Dan Anak-Anak)</h2>
+          <div class="chart-legend"
+            style="display:flex; gap:20px; margin-bottom:20px; justify-content:center; font-size:14px; font-weight:600; color:#555;">
+            <div><span
+                style="display:inline-block; width:16px; height:16px; background:linear-gradient(90deg, #00bcd4, #0097a7); border-radius:4px; margin-right:8px; vertical-align:middle;"></span>
+              Dewasa</div>
+            <div><span
+                style="display:inline-block; width:16px; height:16px; background:linear-gradient(90deg, #ff9800, #ff5722); border-radius:4px; margin-right:8px; vertical-align:middle;"></span>
+              Anak-anak</div>
+          </div>
+          <div id="barChart" class="bar-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pesan">
+      <h1>Pesan Sekarang</h1>
+      <p>Rp 1.800.000 / dewasa</p>
+      <p>Rp 500.000 / anak/balita</p>
+
+      <form onsubmit="kirimPesan(event)" oninput="hitungTotal()">
+        <input type="text" placeholder="Nama Lengkap" required>
+
+        <input type="number" id="dewasa" placeholder="Jumlah Dewasa" min="0" required>
+        <input type="number" id="anak" placeholder="Jumlah Anak-anak" min="0">
+
+        <select id="destinasiPesan" required>
+          <option value="">Pilih Destinasi</option>
+          <option value="japan">Jepang</option>
+          <option value="swiss">Swiss</option>
+          <option value="saudi">Arab Saudi</option>
+          <option value="china">China</option>
+          <option value="korsel">Korea Selatan</option>
+          <option value="korut">Korea Utara</option>
+          <option value="australia">Australia</option>
+          <option value="indonesia">Indonesia</option>
+          <option value="france">France</option>
+          <option value="italy">Italy</option>
+          <option value="turkey">Turkey</option>
+          <option value="thailand">Thailand</option>
+          <option value="singapore">Singapore</option>
+          <option value="amerika">America</option>
+          <option value="inggris">England</option>
+          <option value="rusia">Russia</option>
+        </select>
+
+        <div class="total" id="totalHarga">Total: Rp0</div>
+        <button class="btn">Pesan Sekarang</button>
+      </form>
+    </section>
+
+    <!-- POPUP SUKSES -->
+    <div id="popupSukses" class="popup-sukses">
+      <div class="popup-box">
+
+        <div class="icon">✔</div>
+
+        <h2>Pesanan Berhasil!</h2>
+        <p>Pesanan kamu telah diproses</p>
+
+        <div class="detail">
+
+          <div class="item">
+            <span>Destinasi</span>
+            <b id="destUser"></b>
+          </div>
+
+          <div class="item">
+            <span>Tanggal</span>
+            <b id="tanggalUser"></b>
+          </div>
+
+          <div class="item full">
+            <span>Total</span>
+            <b id="totalUser"></b>
+          </div>
+
+        </div>
+
+        <div class="id-box">
+          ID: <b id="idUser"></b>
+        </div>
+
+        <button onclick="tutupSukses()">Selesai</button>
+
+      </div>
+    </div>
+
+    <!-- HALAMAN KERANJANG -->
+    <div id="cartPage" class="cart-modal">
+      <div class="cart-container">
+        <div class="cart-header">
+          <div class="cart-header-info">
+            <p class="cart-label">Keranjang</p>
+            <h2>Pesanan Saya</h2>
+          </div>
+        </div>
+        <div id="cartItems" class="cart-items">
+          <!-- Items akan ditampilkan di sini -->
+        </div>
+        <div class="cart-empty" id="cartEmpty">
+          <p>Keranjang Anda kosong</p>
+        </div>
+        <div class="cart-footer">
+          <div class="cart-summary">Total Pesanan: <span id="cartSummary">0 item</span></div>
+          <button class="cart-action" onclick="tutupCart()">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.onload = function () {
+        const loader = document.getElementById("loader");
+        if (loader) {
+          loader.style.display = "none";
+        }
+      }
+
+      /* DARK MODE */
+      function toggleDark() {
+        document.body.classList.toggle("dark");
+      }
+
+      /* HITUNG TOTAL */
+      function hitungTotal() {
+        let dewasa = parseInt(document.getElementById("dewasa").value) || 0;
+        let anak = parseInt(document.getElementById("anak").value) || 0;
+        let destinasi = document.getElementById("destinasiPesan").value;
+
+        // harga per orang
+        let hargaDewasa = 1800000;
+        let hargaAnak = 500000;
+
+        // harga destinasi
+        let hargaDestinasi = 0;
+
+        if (destinasi === "japan") {
+          hargaDestinasi = 25000000;
+        }
+        else if (destinasi === "swiss") {
+          hargaDestinasi = 35000000;
+        }
+        else if (destinasi === "saudi") {
+          hargaDestinasi = 30000000;
+        }
+        else if (destinasi === "china") {
+          hargaDestinasi = 22000000;
+        }
+        else if (destinasi === "korsel") {
+          hargaDestinasi = 24000000;
+        }
+        else if (destinasi === "korut") {
+          hargaDestinasi = 40000000;
+        }
+        else if (destinasi === "australia") {
+          hargaDestinasi = 28000000;
+        }
+        else if (destinasi === "indonesia") {
+          hargaDestinasi = 15000000;
+        }
+        else if (destinasi === "france") {
+          hargaDestinasi = 32000000;
+        }
+        else if (destinasi === "italy") {
+          hargaDestinasi = 34000000;
+        }
+        else if (destinasi === "turkey") {
+          hargaDestinasi = 27000000;
+        }
+        else if (destinasi === "thailand") {
+          hargaDestinasi = 18000000;
+        }
+        else if (destinasi === "singapore") {
+          hargaDestinasi = 12000000;
+        }
+        else if (destinasi === "amerika") {
+          hargaDestinasi = 38000000;
+        }
+        else if (destinasi === "inggris") {
+          hargaDestinasi = 33000000;
+        }
+        else if (destinasi === "rusia") {
+          hargaDestinasi = 36000000;
+        }
+
+        let totalOrang = (dewasa * hargaDewasa) + (anak * hargaAnak);
+        let totalKeseluruhan = hargaDestinasi + totalOrang;
+
+        document.getElementById("totalHarga").innerText =
+          "Total: Rp" + totalKeseluruhan.toLocaleString("id-ID");
+      }
+
+      /* SCROLL ANIMATION */
+      const sections = document.querySelectorAll("section");
+      window.addEventListener("scroll", () => {
+        sections.forEach(sec => {
+          if (sec.getBoundingClientRect().top < window.innerHeight - 100) {
+            sec.classList.add("show");
+          }
+        });
+      });
+    </script>
+
+  </div>
+  <footer class="footer" id="kontak">
+
+    <div class="footer-container">
+
+      <!-- KIRI -->
+      <div class="footer-left">
+        <h2>JalanYuk</h2>
         <p>
-          Nikmati Tokyo, Gunung Fuji, Kyoto, dan budaya tradisional Jepang
-          yang memadukan sejarah dengan modernitas.
+          Website "JALAN YUK" yang membantu kamu menemukan destinasi terbaik dunia
+          dengan harga terjangkau dan pengalaman tak terlupakan.
         </p>
       </div>
-    </div>
 
-    <div class="slide">
-      <img src="swiss.png" alt="Swiss">
-      <div class="overlay"></div>
-      <div class="slide-content">
-        <h1>Swisslandia</h1>
-        <p>
-          Jelajahi pegunungan Alpen, danau yang jernih,
-          dan kota romantis dengan pemandangan indah.
-        </p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <img src="saudi.png" alt="Saudi Arabia">
-      <div class="overlay"></div>
-      <div class="slide-content">
-        <h1>Arab Saudi</h1>
-        <p>
-          Kunjungi Makkah, Madinah, dan Riyadh untuk wisata religi
-          dan pengalaman modern yang mewah.
-        </p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <img src="australia.png" alt="Australia">
-      <div class="overlay"></div>
-      <div class="slide-content">
-        <h1>Australia</h1>
-        <p>
-          Nikmati Sydney Opera House, Melbourne,
-          dan Great Barrier Reef yang terkenal di dunia.
-        </p>
-      </div>
-    </div>
-
-<div class="slide">
-      <img src="bali.png" alt="Indonesia">
-      <div class="overlay"></div>
-      <div class="slide-content">
-        <h1>Indonesia</h1>
-        <p>
-          Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot
-        </p>
-      </div>
-    </div>
-
-  </div>
-</header>
-
-<section id="destinasi" class="destinasi">
-  <h1>Destinasi Premium</h1>
-
-  <div class="card-container">
-
-  <!-- SINGAPURA -->
-<div class="card">
-
-  <div class="badge best">🔥 Best Seller</div>
-
-  <img src="singapura.png" alt="Singapore">
-
-  <div class="card-content">
-    <h1>Singapura</h1>
-    <p>Jelajahi Marina Bay Sands, Universal Studios, dan Sentosa.</p>
-    <p class="harga">Mulai dari Rp 12.000.000</p>
-    <div class="sold-badge" id="sold-singapore">Terjual 0</div>
-    <button onclick="bukaPopup('singapore')">Lihat Detail</button>
-  </div>
-
-</div>
-
-<!-- INDONESIA -->
-<div class="card">
-
-  <div class="badge populer">⭐ Pilihan Populer</div>
-
-  <img src="bali.png" alt="Indonesia">
-
-  <div class="card-content">
-    <h1>Indonesia</h1>
-    <p>Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot.</p>
-    <p class="harga">Mulai dari Rp 15.000.000</p>
-    <div class="sold-badge" id="sold-indonesia">Terjual 0</div>
-    <button onclick="bukaPopup('indonesia')">Lihat Detail</button>
-  </div>
-
-</div>
-
-<!-- THAILAND -->
-<div class="card">
-
-  <div class="badge trending">📈 Trending</div>
-
-  <img src="thailand.png" alt="Thailand">
-
-  <div class="card-content">
-    <h1>Thailand</h1>
-    <p>Kunjungi Bangkok, Phuket, dan Pattaya yang populer.</p>
-    <p class="harga">Mulai dari Rp 18.000.000</p>
-    <div class="sold-badge" id="sold-thailand">Terjual 0</div>
-    <button onclick="bukaPopup('thailand')">Lihat Detail</button>
-  </div>
-
-</div>
-
- <!-- TIONGKOK -->
-<div class="card">
-
-  <div class="badge trending">📈 Trending</div>
-
-  <img src="cina.png" alt="China">
-
-  <div class="card-content">
-    <h1>Tiongkok</h1>
-    <p>Jelajahi Beijing, Tembok Besar China, dan gemerlap kota Shanghai.</p>
-    <p class="harga">Mulai dari Rp 22.000.000</p>
-    <div class="sold-badge" id="sold-china">Terjual 0</div>
-    <button onclick="bukaPopup('china')">Lihat Detail</button>
-  </div>
-
-</div>
-
-<!-- KOREA SELATAN -->
-<div class="card">
-
-  <div class="badge populer">⭐ Pilihan Populer</div>
-
-  <img src="korea s.png" alt="South Korea">
-
-  <div class="card-content">
-    <h1>Korea Selatan</h1>
-    <p>Nikmati Seoul, Nami Island, dan budaya K-Pop yang mendunia.</p>
-    <p class="harga">Mulai dari Rp 24.000.000</p>
-    <div class="sold-badge" id="sold-korsel">Terjual 0</div>
-    <button onclick="bukaPopup('korsel')">Lihat Detail</button>
-  </div>
-
-</div>
-
-
-    <!-- JAPAN -->
-    <div class="card">
-
-  <div class="badge best">🔥 Best Seller</div>
-
-  <img src="japan.png" alt="Japan">
-
-  <div class="card-content">
-    <h1>Japan</h1>
-    <p>Nikmati keindahan Tokyo, Gunung Fuji, dan budaya tradisional Kyoto.</p>
-    <p class="harga">Mulai dari Rp 25.000.000</p>
-    <div class="sold-badge" id="sold-japan">Terjual 0</div>
-    <button onclick="bukaPopup('japan')">Lihat Detail</button>
-  </div>
-
-</div>
-
- <!-- TURKI -->
-<div class="card">
-
-  <div class="badge populer">⭐ Pilihan Populer</div>
-
-  <img src="turkey.png" alt="Turkey">
-
-  <div class="card-content">
-    <h1>Turki</h1>
-    <p>Nikmati Cappadocia, Istanbul, dan Hagia Sophia.</p>
-    <p class="harga">Mulai dari Rp 27.000.000</p>
-    <div class="sold-badge" id="sold-turkey">Terjual 0</div>
-    <button onclick="bukaPopup('turkey')">Lihat Detail</button>
-  </div>
-
-</div>
-
-<!-- AUSTRALIA -->
-<div class="card">
-
-  <div class="badge trending">📈 Trending</div>
-
-  <img src="australia.png" alt="Australia">
-
-  <div class="card-content">
-    <h1>Australia</h1>
-    <p>Eksplor Sydney Opera House, Melbourne, dan Great Barrier Reef.</p>
-    <p class="harga">Mulai dari Rp 28.000.000</p>
-    <div class="sold-badge" id="sold-australia">Terjual 0</div>
-    <button onclick="bukaPopup('australia')">Lihat Detail</button>
-  </div>
-
-</div>
-
-
-<!-- ARAB SAUDI -->
-<div class="card">
-
-  <div class="badge religi">🕌 Wisata Religi Populer</div>
-
-  <img src="saudi.png" alt="Saudi Arabia">
-
-  <div class="card-content">
-    <h1>Arab Saudi</h1>
-    <p>Kunjungi Makkah, Madinah, dan wisata modern kota Riyadh.</p>
-    <p class="harga">Mulai dari Rp 30.000.000</p>
-    <div class="sold-badge" id="sold-saudi">Terjual 0</div>
-    <button onclick="bukaPopup('saudi')">Lihat Detail</button>
-  </div>
-
-</div>
-
- <!-- PRANCIS -->
-<div class="card">
-
-  <div class="badge best">🔥 Best Seller</div>
-
-  <img src="paris.png" alt="France">
-
-  <div class="card-content">
-    <h1>Prancis</h1>
-    <p>Kunjungi Menara Eiffel, Louvre, dan kota romantis Paris.</p>
-    <p class="harga">Mulai dari Rp 32.000.000</p>
-    <div class="sold-badge" id="sold-france">Terjual 0</div>
-    <button onclick="bukaPopup('france')">Lihat Detail</button>
-  </div>
-
-</div>
-
-
-<!-- INGGRIS -->
-<div class="card">
-
-  <div class="badge populer">⭐ Pilihan Populer</div>
-
-  <img src="uk.png" alt="England">
-
-  <div class="card-content">
-    <h1>Inggris</h1>
-    <p>Jelajahi London, Big Ben, dan Istana Buckingham.</p>
-    <p class="harga">Mulai dari Rp 33.000.000</p>
-    <div class="sold-badge" id="sold-inggris">Terjual 0</div>
-    <button onclick="bukaPopup('inggris')">Lihat Detail</button>
-  </div>
-
-</div>
-
-<!-- ITALIA -->
-<div class="card">
-
-  <div class="badge best">🔥 Best Seller</div>
-
-  <img src="Italy.png" alt="Italy">
-
-  <div class="card-content">
-    <h1>Italia</h1>
-    <p>Jelajahi Roma, Venesia, dan Menara Pisa yang ikonik.</p>
-    <p class="harga">Mulai dari Rp 34.000.000</p>
-    <div class="sold-badge" id="sold-italy">Terjual 0</div>
-    <button onclick="bukaPopup('italy')">Lihat Detail</button>
-  </div>
-
-</div>
-
-<!-- SWISSLANDIA -->
-<div class="card">
-
-  <div class="badge populer">🔥 Best Seller</div>
-
-  <img src="swiss.png" alt="Swiss">
-
-  <div class="card-content">
-    <h1>Swisslandia</h1>
-    <p>Jelajahi pegunungan Alpen, Danau Zurich, dan kota Lucerne.</p>
-    <p class="harga">Mulai dari Rp 35.000.000</p>
-    <div class="sold-badge" id="sold-swiss">Terjual 0</div>
-    <button onclick="bukaPopup('swiss')">Lihat Detail</button>
-  </div>
-
-</div>
-
-    <!-- RUSIA -->
-<div class="card">
-
-  <div class="badge trending">📈 Trending</div>
-
-  <img src="rs.png" alt="Russia">
-
-  <div class="card-content">
-    <h1>Rusia</h1>
-    <p>Kunjungi Moskow, Kremlin, dan Saint Petersburg yang megah.</p>
-    <p class="harga">Mulai dari Rp 36.000.000</p>
-    <div class="sold-badge" id="sold-rusia">Terjual 0</div>
-    <button onclick="bukaPopup('rusia')">Lihat Detail</button>
-  </div>
-
-</div>
-
-<!-- AMERIKA -->
-<div class="card">
-
-  <div class="badge best">⭐ Pilihan Populer</div>
-
-  <img src="amrik.png" alt="America">
-
-  <div class="card-content">
-    <h1>Amerika</h1>
-    <p>Kunjungi New York, Los Angeles, dan Grand Canyon yang terkenal.</p>
-    <p class="harga">Mulai dari Rp 38.000.000</p>
-    <div class="sold-badge" id="sold-amerika">Terjual 0</div>
-    <button onclick="bukaPopup('amerika')">Lihat Detail</button>
-  </div>
-
-</div>
-
-   <!-- KOREA UTARA -->
-<div class="card">
-
-  <div class="badge trending">📈 Trending</div>
-
-  <img src="korea u.png" alt="North Korea">
-
-  <div class="card-content">
-    <h1>Korea Utara</h1>
-    <p>Kunjungi Pyongyang dan wisata sejarah yang unik dan eksklusif.</p>
-    <p class="harga">Mulai dari Rp 40.000.000</p>
-    <div class="sold-badge" id="sold-korut">Terjual 0</div>
-    <button onclick="bukaPopup('korut')">Lihat Detail</button>
-  </div>
-
-</div>
-
-<div id="popup" class="popup">
-  <div class="popup-box">
-
-    <img id="popup-img" src="">
-    <h2 id="popup-title"></h2>
-    <p id="popup-desc"></p>
-    <p class="harga" id="popup-price"></p>
-
-    <div class="popup-btn">
-      <button class="btn-tutup" onclick="tutupPopup()">Tutup</button>
-      <button class="btn-pesan" onclick="pesanSekarang()">Pesan Sekarang</button>
-    </div>
-
-  </div>
-</div>
-</div>
-
-
-</section>
-
-<section id="diagram" class="diagram">
-  <h1>Diagram Penjualan Per Destinasi</h1>
-  <p>Lihat statistik pesanan berdasarkan destinasi dan jumlah penumpang.</p>
-
-  <div class="diagram-summary">
-    <div class="summary-card">
-      <h2 id="totalDestinations">0</h2>
-      <p>Destinasi Terdata</p>
-    </div>
-    <div class="summary-card">
-      <h2 id="totalOrders">0</h2>
-      <p>Total Order</p>
-    </div>
-  </div>
-
-  <div class="chart-wrapper">
-    <div class="chart-grid" id="salesChart"></div>
-  </div>
-
-  <p class="diagram-note">Data diambil dari order yang tersimpan di keranjang. Diagram akan memperbarui otomatis setiap kali kamu melakukan pemesanan atau menghapus pesanan.</p>
-</section>
-
-<section id="tentang" class="tentang">
-  <h1>Tentang Kami</h1>
-  <p>
-    "JALAN YUK" adalah website wisata yang membantu kamu menemukan
-    destinasi negara terbaik di dunia. Website ini dibuat untuk memudahkan
-    wisatawan dalam mencari informasi tempat wisata, melihat harga paket
-    perjalanan, dan melakukan pemesanan dengan cepat.
-  </p>
-
-  <p>
-    Kami menyediakan berbagai destinasi wisata populer seperti Indonesia, Japan, Inggirs,
-    dan berbagai negara lainnya. Dengan 'Jalan Yuk'
-    liburan kamu akan menjadi lebih mudah, menyenangkan, dan berkesan.
-  </p>
-</section>
-
-<section id="pesan">
-  <h1>Pesan Sekarang</h1>
-  <p>Rp 1.800.000 / dewasa</p>
-  <p>Rp 500.000 / anak/balita</p>
- 
-  <form onsubmit="kirimPesan(event)" oninput="hitungTotal()">
-    <input type="text" placeholder="Nama Lengkap" required>
-
-    <input type="number" id="dewasa" placeholder="Jumlah Dewasa" min="0" required>
-    <input type="number" id="anak" placeholder="Jumlah Anak-anak" min="0">
-   
-    <select id="destinasiPesan" required>
-  <option value="">Pilih Destinasi</option>
-  <option value="japan">Jepang</option>
-  <option value="swiss">Swiss</option>
-  <option value="saudi">Arab Saudi</option>
-  <option value="china">China</option>
-  <option value="korsel">Korea Selatan</option>
-  <option value="korut">Korea Utara</option>
-  <option value="australia">Australia</option>
-  <option value="indonesia">Indonesia</option>
-  <option value="france">France</option>
-  <option value="italy">Italy</option>
-  <option value="turkey">Turkey</option>
-  <option value="thailand">Thailand</option>
-  <option value="singapore">Singapore</option>
-  <option value="amerika">America</option>
-  <option value="inggris">England</option>
-  <option value="rusia">Russia</option>
-</select>
-
-    <div class="total" id="totalHarga">Total: Rp0</div>
-    <button class="btn">Pesan Sekarang</button>
-  </form>
-</section>
-
-<!-- POPUP SUKSES -->
-<div id="popupSukses" class="popup-sukses">
-  <div class="popup-box">
-
-    <div class="icon">✔</div>
-
-    <h2>Pesanan Berhasil!</h2>
-    <p>Pesanan kamu telah diproses</p>
-
-    <div class="detail">
-
-      <div class="item">
-        <span>Destinasi</span>
-        <b id="destUser"></b>
+      <!-- TENGAH -->
+      <div class="footer-mid">
+        <h2>Navigasi</h2>
+        <ul>
+          <li><a href="#home">Beranda</a></li>
+          <li><a href="#destinasi">Destinasi</a></li>
+          <li><a href="#statistik">Statistik</a></li>
+          <li><a href="#tentang">Tentang</a></li>
+          <li><a href="#kontak">Kontak</a></li>
+        </ul>
       </div>
 
-      <div class="item">
-        <span>Tanggal</span>
-        <b id="tanggalUser"></b>
-      </div>
-
-      <div class="item full">
-        <span>Total</span>
-        <b id="totalUser"></b>
+      <!-- KANAN -->
+      <div class="footer-right">
+        <h2>Kontak</h2>
+        <p>📍 Indonesia</p>
+        <a href="https://wa.me/62881036029863?text=Halo%20kak,%20saya%20tertarik%20dengan%20layanan%20travel%20di%20JalanYuk.%20Boleh%20minta%20info%20lebih%20detail%20tentang%20destinasi,%20harga,%20dan%20cara%20pemesanan?%20Terima%20kasih."
+          target="_blank">
+          📞 +62 881 0360 29863
+        </a>
+        <p>✉️ ultramanorb754@gmail.com</p>
       </div>
 
     </div>
 
-    <div class="id-box">
-      ID: <b id="idUser"></b>
-    </div>
-
-    <button onclick="tutupSukses()">Selesai</button>
-
-  </div>
-</div>
-
-<!-- HALAMAN KERANJANG -->
-<div id="cartPage" class="cart-modal">
-  <div class="cart-container">
-    <div class="cart-header">
-      <div class="cart-header-info">
-        <p class="cart-label">Keranjang</p>
-        <h2>Pesanan Saya</h2>
+    <div class="footer-bottom">
+      <div class="visitor-box">
+        👥 <span id="visitorCount">0</span>
       </div>
-     </div>
-    <div id="cartItems" class="cart-items">
-      <!-- Items akan ditampilkan di sini -->
-    </div>
-    <div class="cart-empty" id="cartEmpty">
-      <p>Keranjang Anda kosong</p>
-    </div>
-    <div class="cart-footer">
-      <div class="cart-summary">Total Pesanan: <span id="cartSummary">0 item</span></div>
-      <button class="cart-action" onclick="tutupCart()">Tutup</button>
-    </div>
-  </div>
-</div>
-
-<script>
-window.onload = function(){
-    const loader = document.getElementById("loader");
-    if(loader){
-        loader.style.display = "none";
-    }
-}
-
-/* DARK MODE */
-function toggleDark(){
-    document.body.classList.toggle("dark");
-}
-
-/* HITUNG TOTAL */
-function hitungTotal(){
-    let dewasa = parseInt(document.getElementById("dewasa").value) || 0;
-    let anak = parseInt(document.getElementById("anak").value) || 0;
-    let destinasi = document.getElementById("destinasiPesan").value;
-
-    // harga per orang
-    let hargaDewasa = 1800000;
-    let hargaAnak = 500000;
-   
-    // harga destinasi
-    let hargaDestinasi = 0;
-
-    if(destinasi === "japan"){
-        hargaDestinasi = 25000000;
-    } 
-    else if(destinasi === "swiss"){
-        hargaDestinasi = 35000000;
-    } 
-    else if(destinasi === "saudi"){
-        hargaDestinasi = 30000000;
-    } 
-    else if(destinasi === "china"){
-        hargaDestinasi = 22000000;
-    } 
-    else if(destinasi === "korsel"){
-        hargaDestinasi = 24000000;
-    } 
-    else if(destinasi === "korut"){
-        hargaDestinasi = 40000000;
-    } 
-    else if(destinasi === "australia"){
-        hargaDestinasi = 28000000;
-    }
-        else if(destinasi === "indonesia"){
-        hargaDestinasi = 15000000;
-    }
-    else if(destinasi === "france"){
-        hargaDestinasi = 32000000;
-    }
-    else if(destinasi === "italy"){
-        hargaDestinasi = 34000000;
-    }
-    else if(destinasi === "turkey"){
-        hargaDestinasi = 27000000;
-    }
-    else if(destinasi === "thailand"){
-        hargaDestinasi = 18000000;
-    }
-    else if(destinasi === "singapore"){
-        hargaDestinasi = 12000000;
-    }
-        else if(destinasi === "amerika"){
-        hargaDestinasi = 38000000;
-    }
-    else if(destinasi === "inggris"){
-        hargaDestinasi = 33000000;
-    }
-    else if(destinasi === "rusia"){
-        hargaDestinasi = 36000000;
-    }
-
-    let totalOrang = (dewasa * hargaDewasa) + (anak * hargaAnak);
-    let totalKeseluruhan = hargaDestinasi + totalOrang;
-
-    document.getElementById("totalHarga").innerText =
-    "Total: Rp" + totalKeseluruhan.toLocaleString("id-ID");
-}
-
-/* SCROLL ANIMATION */
-const sections=document.querySelectorAll("section");
-window.addEventListener("scroll",()=>{
-  sections.forEach(sec=>{
-    if(sec.getBoundingClientRect().top < window.innerHeight-100){
-      sec.classList.add("show");
-    }
-  });
-});
-</script>
-
-<footer class="footer" id="kontak">
-
-  <div class="footer-container">
-
-    <!-- KIRI -->
-    <div class="footer-left">
-      <h2>JalanYuk</h2>
-      <p>
-        Website "JALAN YUK" yang membantu kamu menemukan destinasi terbaik dunia
-        dengan harga terjangkau dan pengalaman tak terlupakan.
-      </p>
+      <p>© 2026 jalanYuk | All Rights Reserved</p>
     </div>
 
-    <!-- TENGAH -->
-    <div class="footer-mid">
-      <h2>Navigasi</h2>
-      <ul>
-        <li><a href="#home">Beranda</a></li>
-        <li><a href="#destinasi">Destinasi</a></li>
-        <li><a href="#tentang">Tentang</a></li>
-        <li><a href="#kontak">Kontak</a></li>
-      </ul>
-    </div>
+    <script>
+      function updateVisitor() {
+        let count = localStorage.getItem("visitorCount");
+        if (!count) {
+          count = 1;
+        } else {
+          count = parseInt(count) + 1;
+        }
+        localStorage.setItem("visitorCount", count);
+        document.getElementById("visitorCount").innerText = " Pengunjung: " + count;
+      }
+      updateVisitor();
+    </script>
 
-    <!-- KANAN -->
-    <div class="footer-right">
-      <h2>Kontak</h2>
-      <p>📍 Indonesia</p>
-      <a href="https://wa.me/62881036029863?text=Halo%20kak,%20saya%20tertarik%20dengan%20layanan%20travel%20di%20JalanYuk.%20Boleh%20minta%20info%20lebih%20detail%20tentang%20destinasi,%20harga,%20dan%20cara%20pemesanan?%20Terima%20kasih." target="_blank">
-  📞 +62 881 0360 29863
-      </a>
-      <p>✉️ ultramanorb754@gmail.com</p>
-    </div>
-
-  </div>
-
-  <!-- bawah -->
-  <div class="footer-bottom">
-    <div class="visitor-box">
-       👥 <span id="visitorCount">0</span> 
-       </div>
-    <p>© 2026 jalanYuk | All Rights Reserved</p>
-  </div>
-
-<script>
-function updateVisitor(){
-  let count = localStorage.getItem("visitorCount");
-  if(!count){
-    count = 1;
-  } else {
-    count = parseInt(count) + 1;
-  }
-  localStorage.setItem("visitorCount", count);
-  document.getElementById("visitorCount").innerText = " Pengunjung: " + count;
-}
-updateVisitor();
-</script>
-  
-</footer>
-
-<div id="success" class="toast">
-  <div class="toast-content">
-    <span class="icon">✔</span> <strong>Berhasil!</strong>
-    <div>
-      
-      <p>Pemesanan kamu telah diproses</p>
-    </div>
-  </div>
-  <div class="progress"></div>
-</div>
-
-<script>
-const dataDetail = {
-  japan:{
-    title:"Jepang",
-    img:"japan.png",
-    desc:"Tokyo, Gunung Fuji, Kyoto, dan budaya Jepang.",
-    price:"Rp 25.000.000"
-  },
-  swiss:{
-    title:"Swisslandia",
-    img:"swiss.png",
-    desc:"Pegunungan Alpen dan danau indah.",
-    price:"Rp 35.000.000"
-  },
-  saudi:{
-    title:"Arab Saudi",
-    img:"saudi.png",
-    desc:"Kunjungi Makkah, Madinah, dan Riyadh.",
-    price:"Rp 30.000.000"
-  },
-  china:{
-    title:"Tiongkok",
-    img:"cina.png",
-    desc:"Tembok Besar China dan kota Shanghai.",
-    price:"Rp 22.000.000"
-  },
-  korsel:{
-    title:"Korea Selatan",
-    img:"korea s.png",
-    desc:"Seoul, Nami Island, dan budaya K-Pop.",
-    price:"Rp 24.000.000"
-  },
-  korut:{
-    title:"Korea Utara",
-    img:"korea u.png",
-    desc:"Wisata sejarah unik di Pyongyang.",
-    price:"Rp 40.000.000"
-  },
-  australia:{
-    title:"Australia",
-    img:"australia.png",
-    desc:"Sydney, Melbourne, dan Great Barrier Reef.",
-    price:"Rp 28.000.000"
-  },
-  indonesia:{
-    title:"Indonesia",
-    img:"bali.png",
-    desc:"Pantai Kuta, Ubud, dan Tanah Lot.",
-    price:"Rp 15.000.000"
-  },
-  france:{
-    title:"Prancis",
-    img:"paris.png",
-    desc:"Menara Eiffel dan kota Paris.",
-    price:"Rp 32.000.000"
-  },
-  italy:{
-    title:"Italia",
-    img:"Italy.png",
-    desc:"Roma, Venesia, dan Menara Pisa.",
-    price:"Rp 34.000.000"
-  },
-  turkey:{
-    title:"Turki",
-    img:"turkey.png",
-    desc:"Cappadocia, Istanbul, dan Hagia Sophia.",
-    price:"Rp 27.000.000"
-  },
-  thailand:{
-    title:"Thailand",
-    img:"thailand.png",
-    desc:"Bangkok, Phuket, dan Pattaya.",
-    price:"Rp 18.000.000"
-  },
-  singapore:{
-    title:"Singapura",
-    img:"singapura.png",
-    desc:"Marina Bay Sands dan Sentosa.",
-    price:"Rp 12.000.000"
-  },
-  amerika:{
-    title:"Amerika",
-    img:"amrik.png",
-    desc:"New York, LA, dan Grand Canyon.",
-    price:"Rp 38.000.000"
-  },
-  inggris:{
-    title:"Inggirs",
-    img:"uk.png",
-    desc:"London, Big Ben, Buckingham Palace.",
-    price:"Rp 33.000.000"
-  },
-  rusia:{
-    title:"Rusia",
-    img:"rs.png",
-    desc:"Moskow dan Saint Petersburg.",
-    price:"Rp 36.000.000"
-  }
-};
-
-function bukaPopup(negara){
-  const data = dataDetail[negara];
-
-  document.getElementById("popup-img").src = data.img;
-  document.getElementById("popup-title").innerText = data.title;
-  document.getElementById("popup-desc").innerText = data.desc;
-  document.getElementById("popup-price").innerText = data.price;
-
-  document.getElementById("popup").style.display = "flex";
-}
-</script>
+  </footer>
 
 
 
-<script>
-function tutupPopup(){
-  document.getElementById("popup").style.display = "none";
-}
+  <script>
+    const dataDetail = {
+      japan: {
+        title: "Jepang",
+        img: "japan.png",
+        desc: "Tokyo, Gunung Fuji, Kyoto, dan budaya Jepang.",
+        price: "Rp 25.000.000"
+      },
+      swiss: {
+        title: "Swisslandia",
+        img: "swiss.png",
+        desc: "Pegunungan Alpen dan danau indah.",
+        price: "Rp 35.000.000"
+      },
+      saudi: {
+        title: "Arab Saudi",
+        img: "saudi.png",
+        desc: "Kunjungi Makkah, Madinah, dan Riyadh.",
+        price: "Rp 30.000.000"
+      },
+      china: {
+        title: "Tiongkok",
+        img: "cina.png",
+        desc: "Tembok Besar China dan kota Shanghai.",
+        price: "Rp 22.000.000"
+      },
+      korsel: {
+        title: "Korea Selatan",
+        img: "korea s.png",
+        desc: "Seoul, Nami Island, dan budaya K-Pop.",
+        price: "Rp 24.000.000"
+      },
+      korut: {
+        title: "Korea Utara",
+        img: "korea u.png",
+        desc: "Wisata sejarah unik di Pyongyang.",
+        price: "Rp 40.000.000"
+      },
+      australia: {
+        title: "Australia",
+        img: "australia.png",
+        desc: "Sydney, Melbourne, dan Great Barrier Reef.",
+        price: "Rp 28.000.000"
+      },
+      indonesia: {
+        title: "Indonesia",
+        img: "bali.png",
+        desc: "Pantai Kuta, Ubud, dan Tanah Lot.",
+        price: "Rp 15.000.000"
+      },
+      france: {
+        title: "Prancis",
+        img: "paris.png",
+        desc: "Menara Eiffel dan kota Paris.",
+        price: "Rp 32.000.000"
+      },
+      italy: {
+        title: "Italia",
+        img: "Italy.png",
+        desc: "Roma, Venesia, dan Menara Pisa.",
+        price: "Rp 34.000.000"
+      },
+      turkey: {
+        title: "Turki",
+        img: "turkey.png",
+        desc: "Cappadocia, Istanbul, dan Hagia Sophia.",
+        price: "Rp 27.000.000"
+      },
+      thailand: {
+        title: "Thailand",
+        img: "thailand.png",
+        desc: "Bangkok, Phuket, dan Pattaya.",
+        price: "Rp 18.000.000"
+      },
+      singapore: {
+        title: "Singapura",
+        img: "singapura.png",
+        desc: "Marina Bay Sands dan Sentosa.",
+        price: "Rp 12.000.000"
+      },
+      amerika: {
+        title: "Amerika",
+        img: "amrik.png",
+        desc: "New York, LA, dan Grand Canyon.",
+        price: "Rp 38.000.000"
+      },
+      inggris: {
+        title: "Inggirs",
+        img: "uk.png",
+        desc: "London, Big Ben, Buckingham Palace.",
+        price: "Rp 33.000.000"
+      },
+      rusia: {
+        title: "Rusia",
+        img: "rs.png",
+        desc: "Moskow dan Saint Petersburg.",
+        price: "Rp 36.000.000"
+      }
+    };
 
-function pesanSekarang(){
-  document.getElementById("popup").style.display = "none";
+  </script>
 
-  document.getElementById("pesan").scrollIntoView({
-    behavior: "smooth"
-  });
-}
-</script>
-
-
-
-<script>
-const slides = document.querySelectorAll(".slide");
-let index = 0;
-
-function changeSlide() {
-  slides[index].classList.remove("active");
-
-  index++;
-  if (index >= slides.length) {
-    index = 0;
-  }
-
-  slides[index].classList.add("active");
-}
-
-setInterval(changeSlide, 4000);
-
-function kirimPesan(e){
-  e.preventDefault();
-
-  const destinasi = document.getElementById("destinasiPesan");
-  const destText = destinasi.options[destinasi.selectedIndex].text;
-
-  const total = document.getElementById("totalHarga").innerText;
-
-  const now = new Date();
-  const tanggal = now.toLocaleDateString("id-ID");
-
-  const id = "TRX" + Math.floor(Math.random()*1000000);
-  const dewasa = parseInt(document.getElementById("dewasa").value) || 0;
-  const anak = parseInt(document.getElementById("anak").value) || 0;
-
-  document.getElementById("destUser").innerText = destText;
-  document.getElementById("totalUser").innerText = total;
-  document.getElementById("tanggalUser").innerText = tanggal;
-  document.getElementById("idUser").innerText = id;
-
-  // Increment sales count
-  let salesCount = localStorage.getItem("salesCount") || 0;
-  salesCount = parseInt(salesCount) + 1;
-  localStorage.setItem("salesCount", salesCount);
-
-  // Simpan pesanan ke localStorage
-  let orders = JSON.parse(localStorage.getItem("orders")) || [];
-  orders.push({
-    id: id,
-    destinasi: destText,
-    destKey: destinasi.value,
-    total: total,
-    tanggal: tanggal,
-    waktuOrder: new Date().toLocaleTimeString("id-ID"),
-    dewasa: dewasa,
-    anak: anak
-  });
-  localStorage.setItem("orders", JSON.stringify(orders));
-
-  updateCartIcon();
-  updateDestinationSalesCount();
-  renderSalesDiagram();
-
-  document.getElementById("popupSukses").style.display = "flex";
-}
-
-function tutupSukses(){
-  document.getElementById("popupSukses").style.display = "none";
-}
-
-// Fungsi untuk membuka halaman keranjang
-function bukaCart(){
-  tampilkanPesanan();
-  // Sinkronisasi sales count dengan jumlah orders
-  let orders = JSON.parse(localStorage.getItem("orders")) || [];
-  localStorage.setItem("salesCount", orders.length);
-  updateCartIcon();
-  renderSalesDiagram();
-  document.getElementById("cartPage").style.display = "flex";
-}
-
-// Fungsi untuk menutup halaman keranjang
-function tutupCart(){
-  document.getElementById("cartPage").style.display = "none";
-}
-
-// Fungsi untuk menampilkan pesanan di keranjang
-function tampilkanPesanan(){
-  let orders = JSON.parse(localStorage.getItem("orders")) || [];
-  let cartItemsDiv = document.getElementById("cartItems");
-  let cartEmptyDiv = document.getElementById("cartEmpty");
-  let cartSummary = document.getElementById("cartSummary");
-
-  if(orders.length === 0){
-    cartItemsDiv.innerHTML = "";
-    cartEmptyDiv.style.display = "block";
-    if(cartSummary){
-      cartSummary.innerText = "0 item";
+  <script>
+    function tutupPopup() {
+      document.getElementById("popup").style.display = "none";
     }
-  } else {
-    cartEmptyDiv.style.display = "none";
-    cartItemsDiv.innerHTML = "";
 
-    orders.forEach((order, index) => {
-      let orderHTML = `
+    function pesanSekarang() {
+      document.getElementById("popup").style.display = "none";
+
+      document.getElementById("pesan").scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+
+    // Current selected destination for cart
+    let selectedCartDest = "";
+
+    function tambahKeKeranjang() {
+      if (!selectedCartDest) return;
+
+      const destKey = selectedCartDest;
+      const destText = destinationLabels[destKey] || destKey;
+      const priceStr = dataDetail[destKey]?.price || "Rp 0";
+
+      // Get jumlah dewasa/anak from form if available, default 1 dewasa
+      const formDewasa = document.getElementById("dewasa")?.value || 1;
+      const formAnak = document.getElementById("anak")?.value || 0;
+
+      // Calculate price based on form
+      const hargaDewasa = 1800000;
+      const hargaAnak = 500000;
+      const destPrice = getDestinationPrice(destKey);
+      const total = destPrice + (parseInt(formDewasa) * hargaDewasa) + (parseInt(formAnak) * hargaAnak);
+
+      const now = new Date();
+      const id = "TRX" + Math.floor(Math.random() * 1000000);
+
+      const cartItem = {
+        id: id,
+        destinasi: destText,
+        destKey: destKey,
+        total: "Rp " + total.toLocaleString("id-ID"),
+        tanggal: now.toLocaleDateString("id-ID"),
+        waktuOrder: now.toLocaleTimeString("id-ID"),
+        dewasa: parseInt(formDewasa),
+        anak: parseInt(formAnak),
+        isCart: true
+      };
+
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.push(cartItem);
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      // Update cart count
+      document.getElementById("cartCount").innerText = cart.length;
+
+      // Close popup
+      tutupPopup();
+
+      // Show toast notification
+      showToastCart(destText);
+    }
+
+    // Toast notification for cart
+    function showToastCart(destination) {
+      let toast = document.getElementById('toastCart');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toastCart';
+        toast.className = 'toast-cart';
+        toast.innerHTML = `
+      <span class="toast-icon">✅</span>
+      <div class="toast-text">
+        <strong>${destination}</strong>
+        <span>ditambahkan ke keranjang</span>
+      </div>
+    `;
+        document.body.appendChild(toast);
+      } else {
+        toast.querySelector('strong').innerText = destination;
+      }
+
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Popup centered on screen
+    function bukaPopup(negara) {
+      const data = dataDetail[negara];
+      selectedCartDest = negara;
+
+      document.getElementById("popup-img").src = data.img;
+      document.getElementById("popup-title").innerText = data.title;
+      document.getElementById("popup-desc").innerText = data.desc;
+      document.getElementById("popup-price").innerText = data.price;
+
+      const popup = document.getElementById("popup");
+      popup.style.display = "flex";
+    }
+
+  </script>
+
+
+
+  <script>
+    const slides = document.querySelectorAll(".slide");
+    let index = 0;
+
+    function changeSlide() {
+      slides[index].classList.remove("active");
+
+      index++;
+      if (index >= slides.length) {
+        index = 0;
+      }
+
+      slides[index].classList.add("active");
+    }
+
+    setInterval(changeSlide, 4000);
+
+    function kirimPesan(e) {
+      e.preventDefault();
+
+      const destinasi = document.getElementById("destinasiPesan");
+      const destText = destinasi.options[destinasi.selectedIndex].text;
+
+      const total = document.getElementById("totalHarga").innerText;
+
+      const now = new Date();
+      const tanggal = now.toLocaleDateString("id-ID");
+
+      const id = "TRX" + Math.floor(Math.random() * 1000000);
+      const dewasa = parseInt(document.getElementById("dewasa").value) || 0;
+      const anak = parseInt(document.getElementById("anak").value) || 0;
+
+      document.getElementById("destUser").innerText = destText;
+      document.getElementById("totalUser").innerText = total;
+      document.getElementById("tanggalUser").innerText = tanggal;
+      document.getElementById("idUser").innerText = id;
+
+      // Increment sales count
+      let salesCount = localStorage.getItem("salesCount") || 0;
+      salesCount = parseInt(salesCount) + 1;
+      localStorage.setItem("salesCount", salesCount);
+
+      // Simpan pesanan ke localStorage
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
+      orders.push({
+        id: id,
+        destinasi: destText,
+        destKey: destinasi.value,
+        total: total,
+        tanggal: tanggal,
+        waktuOrder: new Date().toLocaleTimeString("id-ID"),
+        dewasa: dewasa,
+        anak: anak
+      });
+      localStorage.setItem("orders", JSON.stringify(orders));
+
+      updateCartIcon();
+      updateDestinationSalesCount();
+
+      // Reset form setelah berhasil
+      document.querySelector('form[onsubmit="kirimPesan(event)"]').reset();
+      document.getElementById("totalHarga").innerText = "Total: Rp0";
+
+      document.getElementById("popupSukses").style.display = "flex";
+      document.getElementById("pesan").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function tutupSukses() {
+      document.getElementById("popupSukses").style.display = "none";
+    }
+
+    // Fungsi untuk membuka halaman keranjang
+    function bukaCart() {
+      tampilkanCart();
+      // Update cart count
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      document.getElementById("cartCount").innerText = cart.length;
+      document.getElementById("cartPage").style.display = "flex";
+    }
+
+    // Fungsi untuk menutup halaman keranjang
+    function tutupCart() {
+      document.getElementById("cartPage").style.display = "none";
+    }
+
+    // Fungsi untuk menampilkan item di keranjang
+    function tampilkanCart() {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      let cartItemsDiv = document.getElementById("cartItems");
+      let cartEmptyDiv = document.getElementById("cartEmpty");
+      let cartSummary = document.getElementById("cartSummary");
+
+      if (cart.length === 0) {
+        cartItemsDiv.innerHTML = "";
+        cartEmptyDiv.style.display = "block";
+        if (cartSummary) {
+          cartSummary.innerText = "0 item";
+        }
+      } else {
+        cartEmptyDiv.style.display = "none";
+        cartItemsDiv.innerHTML = "";
+
+        cart.forEach((item, index) => {
+          let itemHTML = `
         <div class="cart-item">
           <div class="cart-item-header">
-            <h3>${order.destinasi}</h3>
-            <button class="cart-item-delete" onclick="hapusPesanan(${index})">🗑️ Hapus</button>
+            <h3>${item.destinasi}</h3>
+            <button class="cart-item-delete" onclick="hapusCartItem(${index})">🗑️ Hapus</button>
           </div>
           <div class="cart-item-details">
-            <p><strong>ID Pesanan:</strong> ${order.id}</p>
-            <p><strong>Tanggal:</strong> ${order.tanggal}</p>
-            <p><strong>Waktu Order:</strong> ${order.waktuOrder}</p>
-            <p><strong>Dewasa:</strong> ${order.dewasa ?? 0} orang</p>
-            <p><strong>Anak:</strong> ${order.anak ?? 0} orang</p>
-            <p><strong>Total:</strong> ${order.total}</p>
+            <p><strong>ID Pesanan:</strong> ${item.id}</p>
+            <p><strong>Tanggal:</strong> ${item.tanggal}</p>
+            <p><strong>Dewasa:</strong> ${item.dewasa ?? 1} orang</p>
+            <p><strong>Anak:</strong> ${item.anak ?? 0} orang</p>
+            <p><strong>Total:</strong> ${item.total}</p>
           </div>
         </div>
       `;
-      cartItemsDiv.innerHTML += orderHTML;
+          cartItemsDiv.innerHTML += itemHTML;
+        });
+
+        if (cartSummary) {
+          cartSummary.innerText = `${cart.length} item${cart.length === 1 ? '' : 's'}`;
+        }
+      }
+    }
+
+    if (orders.length === 0) {
+      cartItemsDiv.innerHTML = "";
+      cartEmptyDiv.style.display = "block";
+      if (cartSummary) {
+        cartSummary.innerText = "0 item";
+      }
+    }
+
+    // Fungsi untuk menghapus item di keranjang
+    function hapusCartItem(index) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      document.getElementById("cartCount").innerText = cart.length;
+      tampilkanCart();
+    }
+
+    // Fungsi untuk menghapus pesanan
+    function hapusPesanan(index) {
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
+      orders.splice(index, 1);
+      localStorage.setItem("orders", JSON.stringify(orders));
+
+      // Update sales count
+      let salesCount = localStorage.getItem("salesCount") || 0;
+      salesCount = Math.max(0, parseInt(salesCount) - 1);
+      localStorage.setItem("salesCount", salesCount);
+      updateCartIcon();
+
+      tampilkanPesanan();
+    }
+
+    // Simpan statistik ke localStorage
+    function saveStatistics(stats) {
+      localStorage.setItem("savedStatistics", JSON.stringify(stats));
+    }
+
+    // Ambil statistik dari localStorage
+    function getSavedStatistics() {
+      const saved = localStorage.getItem("savedStatistics");
+      return saved ? JSON.parse(saved) : null;
+    }
+
+    // Tampilkan statistik yang tersimpan
+    // Tampilkan statistik yang tersimpan
+    function displayStatistics(stats) {
+      if (!stats) return;
+      document.getElementById("totalOrders").innerText = stats.totalOrders;
+      document.getElementById("totalRevenue").innerText = stats.totalRevenue;
+      document.getElementById("topDestination").innerText = stats.topDestination;
+
+      const barChart = document.getElementById("barChart");
+      if (barChart && stats.destSalesCombined) {
+        barChart.innerHTML = "";
+        const maxCount = stats.maxCountCombined > 0 ? stats.maxCountCombined : 1;
+
+        stats.destSalesCombined.forEach(({ label, countDewasa, countAnak }) => {
+          const percentDewasa = (countDewasa / maxCount) * 100;
+          const percentAnak = (countAnak / maxCount) * 100;
+
+          const div = document.createElement("div");
+          div.className = "bar-item";
+          div.innerHTML = `
+        <div class="bar-label">${label}</div>
+        <div class="bar-group" style="display:flex; flex:1; gap:10px;">
+          <div class="bar-container" style="flex:1;">
+            <div class="bar-fill" style="width: ${percentDewasa}%">${countDewasa}</div>
+          </div>
+          <div class="bar-container" style="flex:1;">
+            <div class="bar-fill-anak" style="width: ${percentAnak}%">${countAnak}</div>
+          </div>
+        </div>
+      `;
+          barChart.appendChild(div);
+        });
+      }
+    }
+
+    // Statistik Function
+    function updateStatistics() {
+      const orders = getStoredOrders();
+      const counts = {};
+      const countsDewasa = {};
+      const countsAnak = {};
+
+      orders.forEach(order => {
+        const key = order.destKey || getDestinationKey(order.destinasi);
+        if (!key) return;
+        counts[key] = (counts[key] || 0) + 1;
+        countsDewasa[key] = (countsDewasa[key] || 0) + (order.dewasa || 0);
+        countsAnak[key] = (countsAnak[key] || 0) + (order.anak || 0);
+      });
+
+      // Total Orders
+      const totalOrders = orders.length;
+      document.getElementById("totalOrders").innerText = totalOrders;
+
+      // Total Revenue
+      let totalRevenue = 0;
+      orders.forEach(order => {
+        const totalStr = order.total || "Rp 0";
+        const num = parseInt(totalStr.replace(/[^0-9]/g, "")) || 0;
+        totalRevenue += num;
+      });
+      const totalRevenueText = "Rp " + totalRevenue.toLocaleString("id-ID");
+      document.getElementById("totalRevenue").innerText = totalRevenueText;
+
+      // Top Destination (Berdasarkan total pesanan)
+      let topDest = "-";
+      let maxCount = 0;
+      for (const [key, count] of Object.entries(counts)) {
+        if (count > maxCount) {
+          maxCount = count;
+          topDest = destinationLabels[key] || key;
+        }
+      }
+      document.getElementById("topDestination").innerText = topDest;
+
+      const allDestinations = [
+        "japan", "swiss", "saudi", "china", "korsel", "korut",
+        "australia", "indonesia", "france", "italy", "turkey",
+        "thailand", "singapore", "amerika", "inggris", "rusia"
+      ];
+
+      // --- Diagram Gabungan ---
+      const barChart = document.getElementById("barChart");
+      if (barChart) barChart.innerHTML = "";
+
+      const destSalesCombined = allDestinations.map(key => {
+        return {
+          key,
+          label: destinationLabels[key],
+          countDewasa: countsDewasa[key] || 0,
+          countAnak: countsAnak[key] || 0,
+          total: (countsDewasa[key] || 0) + (countsAnak[key] || 0)
+        };
+      }).sort((a, b) => b.total - a.total);
+
+      let maxCountCombined = 1;
+      destSalesCombined.forEach(d => {
+        if (d.countDewasa > maxCountCombined) maxCountCombined = d.countDewasa;
+        if (d.countAnak > maxCountCombined) maxCountCombined = d.countAnak;
+      });
+
+      if (barChart) {
+        destSalesCombined.forEach(({ label, countDewasa, countAnak }) => {
+          const percentDewasa = (countDewasa / maxCountCombined) * 100;
+          const percentAnak = (countAnak / maxCountCombined) * 100;
+
+          const div = document.createElement("div");
+          div.className = "bar-item";
+          div.innerHTML = `
+        <div class="bar-label">${label}</div>
+        <div class="bar-group" style="display:flex; flex:1; gap:10px;">
+          <div class="bar-container" style="flex:1;">
+            <div class="bar-fill" style="width: ${percentDewasa}%">${countDewasa}</div>
+          </div>
+          <div class="bar-container" style="flex:1;">
+            <div class="bar-fill-anak" style="width: ${percentAnak}%">${countAnak}</div>
+          </div>
+        </div>
+      `;
+          barChart.appendChild(div);
+        });
+      }
+
+      // Simpan statistik ke localStorage
+      const statisticsData = {
+        totalOrders: totalOrders,
+        totalRevenue: totalRevenueText,
+        topDestination: topDest,
+        destSalesCombined: destSalesCombined,
+        maxCountCombined: maxCountCombined,
+        timestamp: new Date().getTime()
+      };
+      saveStatistics(statisticsData);
+    }
+
+    // Update statistics on load
+    document.addEventListener("DOMContentLoaded", () => {
+      // Tampilkan statistik yang tersimpan terlebih dahulu
+      const savedStats = getSavedStatistics();
+      if (savedStats) {
+        displayStatistics(savedStats);
+      }
+
+      // Kemudian update statistik dengan data terbaru
+      setTimeout(updateStatistics, 100);
     });
 
-    if(cartSummary){
-      cartSummary.innerText = `${orders.length} item${orders.length === 1 ? '' : 's'}`;
-    }
-  }
-}
+  </script>
 
-// Fungsi untuk menghapus pesanan
-function hapusPesanan(index){
-  let orders = JSON.parse(localStorage.getItem("orders")) || [];
-  orders.splice(index, 1);
-  localStorage.setItem("orders", JSON.stringify(orders));
-  
-  // Update sales count
-  let salesCount = localStorage.getItem("salesCount") || 0;
-  salesCount = Math.max(0, parseInt(salesCount) - 1);
-  localStorage.setItem("salesCount", salesCount);
-  updateCartIcon();
-  
-  tampilkanPesanan();
-}
+  <div id="popup" class="popup">
+    <div class="popup-box">
+      <img id="popup-img" src="">
+      <h2 id="popup-title"></h2>
+      <p id="popup-desc"></p>
+      <p class="harga" id="popup-price"></p>
+      <div class="popup-btn">
+        <button class="btn-tutup" onclick="tutupPopup()">Tutup</button>
+        <button class="btn-cart" onclick="tambahKeKeranjang()">🛒 Keranjang</button>
+        <button class="btn-pesan" onclick="pesanSekarang()">Pesan Sekarang</button>
+      </div>
+    </div>
+  </div>
 
-</script>
-</body> 
+</body>
+
 </html>
