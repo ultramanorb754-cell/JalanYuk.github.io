@@ -247,20 +247,26 @@
   }
 
   .sold-badge {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
       margin: 10px auto 12px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(0, 188, 212, 0.14);
+      padding: 10px 18px;
+      border-radius: 15px;
+      background: rgba(0, 188, 212, 0.12);
       color: #006f84;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.15px;
+      font-size: 0.8rem;
+      font-weight: 600;
       width: fit-content;
-      min-width: 84px;
-      line-height: 1.4;
-      white-space: pre-line;
+      min-width: 120px;
+      line-height: 1.6;
+  }
+
+  .sold-badge b {
+      color: #00bcd4;
+      font-weight: 800;
+      margin-left: 4px;
   }
 
   body.dark .sold-badge {
@@ -268,7 +274,75 @@
       color: #9de9ff;
   }
 
-  /* Dark Mode Cart Icon */
+  /* CART MODAL TABS */
+  .cart-header-tabs {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+  }
+
+  .cart-tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #888;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 10px 10px 0 0;
+    position: relative;
+  }
+
+  .cart-tab:hover {
+    color: var(--primary);
+    background: rgba(0, 188, 212, 0.05);
+  }
+
+  .cart-tab.active {
+    color: var(--primary);
+  }
+
+  .cart-tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 10px;
+  }
+
+  body.dark .cart-tab {
+    color: #aaa;
+  }
+
+  body.dark .cart-tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  body.dark .cart-tab.active {
+    color: #00bcd4;
+  }
+
+  body.dark .cart-header-tabs {
+    border-color: #333;
+  }
+
+  .cart-type-item {
+    border-left: 4px solid #ff9800; /* Orange for cart */
+  }
+
+  .order-type-item {
+    border-left: 4px solid #4caf50; /* Green for orders */
+  }
+
   body.dark .cart-icon-wrapper {
       color: white;
       background: rgba(255,255,255,0.08);
@@ -279,15 +353,121 @@
       background: rgba(255,255,255,0.14);
   }
 
-
   /* Responsive: Jika layar HP, padding diperkecil */
   @media (max-width: 768px) {
       nav {
           padding: 10px 20px;
       }
       nav ul {
-          display: none; /* Sembunyikan menu di HP jika belum ada hamburger */
+          display: none; /* Sembunyikan menu di HP */
       }
+      nav h1 {
+        font-size: 1.1rem;
+      }
+      .nav-btn {
+        display: none; /* Sembunyikan tombol Mode Gelap di nav utama pada HP */
+      }
+      .menu-toggle {
+        display: block;
+      }
+  }
+
+  /* MOBILE MENU OVERLAY */
+  .menu-toggle {
+    display: none;
+    background: var(--primary);
+    border: none;
+    color: black;
+    font-size: 1.5rem;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(15px);
+    z-index: 2000;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+  }
+
+  .mobile-menu.active {
+    right: 0;
+  }
+
+  .mobile-menu ul {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+  }
+
+  .mobile-menu li {
+    margin: 25px 0;
+  }
+
+  .mobile-menu a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 700;
+    transition: 0.3s;
+  }
+
+  .mobile-menu a:hover {
+    color: var(--primary);
+  }
+
+  .close-menu {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    cursor: pointer;
+  }
+
+  /* CARD & GRID RESPONSIVENESS */
+  @media (max-width: 600px) {
+    .card-container {
+      gap: 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 340px;
+    }
+    .hero {
+      padding-top: 70px;
+    }
+    .slide-content h1 {
+      font-size: 2.2rem;
+    }
+    .statistik-summary {
+      flex-direction: column;
+      align-items: center;
+    }
+    .stat-card {
+      width: 80%;
+    }
+    .bar-label {
+      width: 80px;
+      font-size: 11px;
+    }
+    .cart-modal .cart-container {
+      width: 95%;
+      height: 90vh;
+    }
   }
 
   /* ================= HERO ================= */
@@ -754,7 +934,7 @@
     color: #222;
     padding: 30px 20px 20px;
     box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-    margin-top: auto;
+    margin-top: 120px;
     flex: 0 0 auto !important;
     height: auto !important;
     min-height: 0 !important;

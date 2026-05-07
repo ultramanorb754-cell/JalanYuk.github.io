@@ -48,13 +48,11 @@
 
     function updateDestinationSalesCount() {
       const orders = getStoredOrders();
-      const counts = {};
       const details = {};
 
       orders.forEach(order => {
         const key = order.destKey || getDestinationKey(order.destinasi);
         if (!key) return;
-        counts[key] = (counts[key] || 0) + 1;
 
         if (!details[key]) {
           details[key] = { totalDewasa: 0, totalAnak: 0 };
@@ -63,29 +61,17 @@
         details[key].totalAnak += order.anak || 0;
       });
 
-      const popupButtons = document.querySelectorAll("button[onclick^='bukaPopup']");
-      popupButtons.forEach(button => {
-        const match = button.getAttribute("onclick").match(/bukaPopup\('(.+?)'\)/);
-        if (!match) return;
-        const destKey = match[1];
-        let soldBadge = button.parentElement.querySelector(".sold-badge");
-        if (!soldBadge) {
-          soldBadge = document.createElement("div");
-          soldBadge.className = "sold-badge";
-          soldBadge.id = `sold-${destKey}`;
-          button.parentElement.insertBefore(soldBadge, button);
-        }
-        const count = counts[destKey] || 0;
+      // Update every sold-badge on destination cards
+      const allBadges = document.querySelectorAll(".sold-badge");
+      allBadges.forEach(badge => {
+        const destKey = badge.id.replace("sold-", "");
         const detail = details[destKey] || { totalDewasa: 0, totalAnak: 0 };
-        if (count > 0) {
-          const totalTerjual = detail.totalDewasa + detail.totalAnak;
-          soldBadge.innerText = `Dewasa ${detail.totalDewasa}\nAnak ${detail.totalAnak}\nTerjual ${totalTerjual}`;
-          soldBadge.style.whiteSpace = "pre-line";
-        } else {
-          soldBadge.innerText = "Terjual 0";
-          soldBadge.style.whiteSpace = "normal";
-        }
-        soldBadge.style.opacity = count > 0 ? "1" : "0.55";
+        const totalTerjual = detail.totalDewasa + detail.totalAnak;
+        badge.innerHTML =
+          `<div>Dewasa: <b>${detail.totalDewasa}</b></div>` +
+          `<div>Anak: <b>${detail.totalAnak}</b></div>` +
+          `<div>Terjual: <b>${totalTerjual}</b></div>`;
+        badge.style.opacity = totalTerjual > 0 ? "1" : "0.6";
       });
     }
 
@@ -140,38 +126,6 @@
       return date;
     }
 
-    function seedRandomOrders() {
-      const orders = getStoredOrders();
-      if (orders.length > 0 || localStorage.getItem("ordersSeeded") === "true") return;
-
-      const sampleKeys = Object.keys(destinationLabels);
-
-      const seededOrders = sampleKeys.flatMap(destKey => {
-        const orderCount = getRandomInt(1, 5);
-        return Array.from({ length: orderCount }, () => {
-          const dewasa = getRandomInt(1, 5);
-          const anak = getRandomInt(0, 3);
-          const destPrice = getDestinationPrice(destKey);
-          const totalOrang = dewasa * 1800000 + anak * 500000;
-          const total = destPrice + totalOrang;
-          const now = getRandomDate(30);
-          return {
-            id: "TRX" + Math.floor(Math.random() * 1000000),
-            destinasi: destinationLabels[destKey] || destKey,
-            destKey,
-            total: "Rp " + total.toLocaleString("id-ID"),
-            tanggal: now.toLocaleDateString("id-ID"),
-            waktuOrder: now.toLocaleTimeString("id-ID"),
-            dewasa,
-            anak
-          };
-        });
-      });
-
-      localStorage.setItem("orders", JSON.stringify(seededOrders));
-      localStorage.setItem("ordersSeeded", "true");
-    }
-
     function updateCartIcon() {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
       document.getElementById("cartCount").innerText = cart.length;
@@ -179,11 +133,37 @@
       updateStatistics();
     }
 
+    // Clear everything to start from zero for this version
+    (function resetEverything() {
+      if (localStorage.getItem("version_reset_v2") !== "true") {
+        localStorage.removeItem("orders");
+        localStorage.removeItem("cart");
+        localStorage.removeItem("ordersSeeded");
+        localStorage.removeItem("salesCount");
+        localStorage.removeItem("savedStatistics");
+        localStorage.setItem("version_reset_v2", "true");
+      }
+    })();
+
     // Update cart icon saat page load
     document.addEventListener("DOMContentLoaded", () => {
-      seedRandomOrders();
       updateCartIcon();
     });
+
+    // Real-time synchronization between tabs (e.g., Mobile view vs Desktop admin view)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'orders' || e.key === 'cart') {
+        updateCartIcon();
+        if (typeof tampilkanCart === 'function' && document.getElementById('cartPage').style.display === 'flex') {
+          tampilkanCart();
+        }
+      }
+    });
+
+    function toggleMenu() {
+      const menu = document.getElementById("mobileMenu");
+      menu.classList.toggle("active");
+    }
   </script>
 </head>
 
@@ -207,8 +187,20 @@
         <span id="cartCount" class="cart-badge">0</span>
       </button>
       <button class="nav-btn toggle-btn" onclick="toggleDark()">Mode Gelap</button>
+      <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">☰</button>
     </div>
   </nav>
+
+  <div id="mobileMenu" class="mobile-menu">
+    <button class="close-menu" onclick="toggleMenu()">×</button>
+    <ul>
+      <li><a href="#home" onclick="toggleMenu()">Beranda</a></li>
+      <li><a href="#destinasi" onclick="toggleMenu()">Destinasi</a></li>
+      <li><a href="#statistik" onclick="toggleMenu()">Statistik</a></li>
+      <li><a href="#tentang" onclick="toggleMenu()">Tentang</a></li>
+      <li><a href="#kontak" onclick="toggleMenu()">Kontak</a></li>
+    </ul>
+  </div>
 
   <div class="page-wrapper">
     <header id="home" class="hero">
@@ -293,7 +285,7 @@
             <h1>Singapura</h1>
             <p>Jelajahi Marina Bay Sands, Universal Studios, dan Sentosa.</p>
             <p class="harga">Mulai dari Rp 12.000.000</p>
-            <div class="sold-badge" id="sold-singapore">Terjual 0</div>
+            <div class="sold-badge" id="sold-singapore">Terjual</div>
             <button onclick="bukaPopup('singapore')">Lihat Detail</button>
           </div>
 
@@ -310,7 +302,7 @@
             <h1>Indonesia</h1>
             <p>Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot.</p>
             <p class="harga">Mulai dari Rp 15.000.000</p>
-            <div class="sold-badge" id="sold-indonesia">Terjual 0</div>
+            <div class="sold-badge" id="sold-indonesia">Terjual</div>
             <button onclick="bukaPopup('indonesia')">Lihat Detail</button>
           </div>
 
@@ -327,7 +319,7 @@
             <h1>Thailand</h1>
             <p>Kunjungi Bangkok, Phuket, dan Pattaya yang populer.</p>
             <p class="harga">Mulai dari Rp 18.000.000</p>
-            <div class="sold-badge" id="sold-thailand">Terjual 0</div>
+            <div class="sold-badge" id="sold-thailand">Terjual</div>
             <button onclick="bukaPopup('thailand')">Lihat Detail</button>
           </div>
 
@@ -344,7 +336,7 @@
             <h1>Tiongkok</h1>
             <p>Jelajahi Beijing, Tembok Besar China, dan gemerlap kota Shanghai.</p>
             <p class="harga">Mulai dari Rp 22.000.000</p>
-            <div class="sold-badge" id="sold-china">Terjual 0</div>
+            <div class="sold-badge" id="sold-china">Terjual</div>
             <button onclick="bukaPopup('china')">Lihat Detail</button>
           </div>
 
@@ -361,7 +353,7 @@
             <h1>Korea Selatan</h1>
             <p>Nikmati Seoul, Nami Island, dan budaya K-Pop yang mendunia.</p>
             <p class="harga">Mulai dari Rp 24.000.000</p>
-            <div class="sold-badge" id="sold-korsel">Terjual 0</div>
+            <div class="sold-badge" id="sold-korsel">Terjual</div>
             <button onclick="bukaPopup('korsel')">Lihat Detail</button>
           </div>
 
@@ -379,7 +371,7 @@
             <h1>Japan</h1>
             <p>Nikmati keindahan Tokyo, Gunung Fuji, dan budaya tradisional Kyoto.</p>
             <p class="harga">Mulai dari Rp 25.000.000</p>
-            <div class="sold-badge" id="sold-japan">Terjual 0</div>
+            <div class="sold-badge" id="sold-japan">Terjual</div>
             <button onclick="bukaPopup('japan')">Lihat Detail</button>
           </div>
 
@@ -396,7 +388,7 @@
             <h1>Turki</h1>
             <p>Nikmati Cappadocia, Istanbul, dan Hagia Sophia.</p>
             <p class="harga">Mulai dari Rp 27.000.000</p>
-            <div class="sold-badge" id="sold-turkey">Terjual 0</div>
+            <div class="sold-badge" id="sold-turkey">Terjual</div>
             <button onclick="bukaPopup('turkey')">Lihat Detail</button>
           </div>
 
@@ -413,7 +405,7 @@
             <h1>Australia</h1>
             <p>Eksplor Sydney Opera House, Melbourne, dan Great Barrier Reef.</p>
             <p class="harga">Mulai dari Rp 28.000.000</p>
-            <div class="sold-badge" id="sold-australia">Terjual 0</div>
+            <div class="sold-badge" id="sold-australia">Terjual</div>
             <button onclick="bukaPopup('australia')">Lihat Detail</button>
           </div>
 
@@ -431,7 +423,7 @@
             <h1>Arab Saudi</h1>
             <p>Kunjungi Makkah, Madinah, dan wisata modern kota Riyadh.</p>
             <p class="harga">Mulai dari Rp 30.000.000</p>
-            <div class="sold-badge" id="sold-saudi">Terjual 0</div>
+            <div class="sold-badge" id="sold-saudi">Terjual</div>
             <button onclick="bukaPopup('saudi')">Lihat Detail</button>
           </div>
 
@@ -448,7 +440,7 @@
             <h1>Prancis</h1>
             <p>Kunjungi Menara Eiffel, Louvre, dan kota romantis Paris.</p>
             <p class="harga">Mulai dari Rp 32.000.000</p>
-            <div class="sold-badge" id="sold-france">Terjual 0</div>
+            <div class="sold-badge" id="sold-france">Terjual</div>
             <button onclick="bukaPopup('france')">Lihat Detail</button>
           </div>
 
@@ -466,7 +458,7 @@
             <h1>Inggris</h1>
             <p>Jelajahi London, Big Ben, dan Istana Buckingham.</p>
             <p class="harga">Mulai dari Rp 33.000.000</p>
-            <div class="sold-badge" id="sold-inggris">Terjual 0</div>
+            <div class="sold-badge" id="sold-inggris">Terjual</div>
             <button onclick="bukaPopup('inggris')">Lihat Detail</button>
           </div>
 
@@ -483,7 +475,7 @@
             <h1>Italia</h1>
             <p>Jelajahi Roma, Venesia, dan Menara Pisa yang ikonik.</p>
             <p class="harga">Mulai dari Rp 34.000.000</p>
-            <div class="sold-badge" id="sold-italy">Terjual 0</div>
+            <div class="sold-badge" id="sold-italy">Terjual</div>
             <button onclick="bukaPopup('italy')">Lihat Detail</button>
           </div>
 
@@ -500,7 +492,7 @@
             <h1>Swisslandia</h1>
             <p>Jelajahi pegunungan Alpen, Danau Zurich, dan kota Lucerne.</p>
             <p class="harga">Mulai dari Rp 35.000.000</p>
-            <div class="sold-badge" id="sold-swiss">Terjual 0</div>
+            <div class="sold-badge" id="sold-swiss">Terjual</div>
             <button onclick="bukaPopup('swiss')">Lihat Detail</button>
           </div>
 
@@ -517,7 +509,7 @@
             <h1>Rusia</h1>
             <p>Kunjungi Moskow, Kremlin, dan Saint Petersburg yang megah.</p>
             <p class="harga">Mulai dari Rp 36.000.000</p>
-            <div class="sold-badge" id="sold-rusia">Terjual 0</div>
+            <div class="sold-badge" id="sold-rusia">Terjual</div>
             <button onclick="bukaPopup('rusia')">Lihat Detail</button>
           </div>
 
@@ -534,7 +526,7 @@
             <h1>Amerika</h1>
             <p>Kunjungi New York, Los Angeles, dan Grand Canyon yang terkenal.</p>
             <p class="harga">Mulai dari Rp 38.000.000</p>
-            <div class="sold-badge" id="sold-amerika">Terjual 0</div>
+            <div class="sold-badge" id="sold-amerika">Terjual</div>
             <button onclick="bukaPopup('amerika')">Lihat Detail</button>
           </div>
 
@@ -551,7 +543,7 @@
             <h1>Korea Utara</h1>
             <p>Kunjungi Pyongyang dan wisata sejarah yang unik dan eksklusif.</p>
             <p class="harga">Mulai dari Rp 40.000.000</p>
-            <div class="sold-badge" id="sold-korut">Terjual 0</div>
+            <div class="sold-badge" id="sold-korut">Terjual</div>
             <button onclick="bukaPopup('korut')">Lihat Detail</button>
           </div>
 
@@ -714,9 +706,9 @@
     <div id="cartPage" class="cart-modal">
       <div class="cart-container">
         <div class="cart-header">
-          <div class="cart-header-info">
-            <p class="cart-label">Keranjang</p>
-            <h2>Pesanan Saya</h2>
+          <div class="cart-header-tabs">
+            <button id="tabKeranjang" class="cart-tab active" onclick="setCartTab('keranjang')">Keranjang Saya</button>
+            <button id="tabPesanan" class="cart-tab" onclick="setCartTab('pesanan')">Pesanan Saya</button>
           </div>
         </div>
         <div id="cartItems" class="cart-items">
@@ -1012,44 +1004,37 @@
 
       const destKey = selectedCartDest;
       const destText = destinationLabels[destKey] || destKey;
-      const priceStr = dataDetail[destKey]?.price || "Rp 0";
 
-      // Get jumlah dewasa/anak from form if available, default 1 dewasa
-      const formDewasa = document.getElementById("dewasa")?.value || 1;
-      const formAnak = document.getElementById("anak")?.value || 0;
+      const formDewasa = parseInt(document.getElementById("dewasa")?.value) || 1;
+      const formAnak = parseInt(document.getElementById("anak")?.value) || 0;
 
-      // Calculate price based on form
       const hargaDewasa = 1800000;
       const hargaAnak = 500000;
       const destPrice = getDestinationPrice(destKey);
-      const total = destPrice + (parseInt(formDewasa) * hargaDewasa) + (parseInt(formAnak) * hargaAnak);
+      const totalNum = destPrice + (formDewasa * hargaDewasa) + (formAnak * hargaAnak);
+      const totalStr = "Rp " + totalNum.toLocaleString("id-ID");
 
       const now = new Date();
-      const id = "TRX" + Math.floor(Math.random() * 1000000);
+      const id = "CRT" + Math.floor(Math.random() * 1000000);
 
-      const cartItem = {
+      const newItem = {
         id: id,
         destinasi: destText,
         destKey: destKey,
-        total: "Rp " + total.toLocaleString("id-ID"),
+        total: totalStr,
         tanggal: now.toLocaleDateString("id-ID"),
         waktuOrder: now.toLocaleTimeString("id-ID"),
-        dewasa: parseInt(formDewasa),
-        anak: parseInt(formAnak),
+        dewasa: formDewasa,
+        anak: formAnak,
         isCart: true
       };
 
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      cart.push(cartItem);
+      cart.push(newItem);
       localStorage.setItem("cart", JSON.stringify(cart));
 
-      // Update cart count
-      document.getElementById("cartCount").innerText = cart.length;
-
-      // Close popup
+      updateCartIcon();
       tutupPopup();
-
-      // Show toast notification
       showToastCart(destText);
     }
 
@@ -1168,59 +1153,65 @@
       document.getElementById("popupSukses").style.display = "none";
     }
 
-    // Fungsi untuk membuka halaman keranjang
-    function bukaCart() {
+    function updateCartIcon() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const orders = JSON.parse(localStorage.getItem("orders")) || [];
+      document.getElementById("cartCount").innerText = cart.length + orders.length;
+      updateDestinationSalesCount();
+      updateStatistics();
+    }
+
+    let currentCartTab = 'keranjang';
+
+    function setCartTab(tab) {
+      currentCartTab = tab;
+      document.getElementById('tabKeranjang').classList.toggle('active', tab === 'keranjang');
+      document.getElementById('tabPesanan').classList.toggle('active', tab === 'pesanan');
       tampilkanCart();
-      // Update cart count
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      document.getElementById("cartCount").innerText = cart.length;
-      document.getElementById("cartPage").style.display = "flex";
     }
 
-    // Fungsi untuk menutup halaman keranjang
-    function tutupCart() {
-      document.getElementById("cartPage").style.display = "none";
-    }
-
-    // Fungsi untuk menampilkan item di keranjang
+    // Fungsi untuk menampilkan item di keranjang (Keranjang & Pesanan)
     function tampilkanCart() {
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
       let cartItemsDiv = document.getElementById("cartItems");
       let cartEmptyDiv = document.getElementById("cartEmpty");
       let cartSummary = document.getElementById("cartSummary");
 
-      if (cart.length === 0) {
-        cartItemsDiv.innerHTML = "";
+      cartItemsDiv.innerHTML = "";
+
+      const itemsToShow = (currentCartTab === 'keranjang') ? cart : orders;
+
+      if (itemsToShow.length === 0) {
         cartEmptyDiv.style.display = "block";
-        if (cartSummary) {
-          cartSummary.innerText = "0 item";
-        }
-      } else {
-        cartEmptyDiv.style.display = "none";
-        cartItemsDiv.innerHTML = "";
+        cartEmptyDiv.querySelector('p').innerText = currentCartTab === 'keranjang' ? "Keranjang Anda kosong" : "Belum ada pesanan yang dibeli";
+        if (cartSummary) cartSummary.innerText = "0 item";
+        return;
+      }
 
-        cart.forEach((item, index) => {
-          let itemHTML = `
-        <div class="cart-item">
-          <div class="cart-item-header">
-            <h3>${item.destinasi}</h3>
-            <button class="cart-item-delete" onclick="hapusCartItem(${index})">🗑️ Hapus</button>
-          </div>
-          <div class="cart-item-details">
-            <p><strong>ID Pesanan:</strong> ${item.id}</p>
-            <p><strong>Tanggal:</strong> ${item.tanggal}</p>
-            <p><strong>Dewasa:</strong> ${item.dewasa ?? 1} orang</p>
-            <p><strong>Anak:</strong> ${item.anak ?? 0} orang</p>
-            <p><strong>Total:</strong> ${item.total}</p>
-          </div>
-        </div>
-      `;
-          cartItemsDiv.innerHTML += itemHTML;
-        });
+      cartEmptyDiv.style.display = "none";
 
-        if (cartSummary) {
-          cartSummary.innerText = `${cart.length} item${cart.length === 1 ? '' : 's'}`;
-        }
+      itemsToShow.forEach((item, index) => {
+        let isCart = currentCartTab === 'keranjang';
+        let itemHTML = `
+          <div class="cart-item ${isCart ? 'cart-type-item' : 'order-type-item'}">
+            <div class="cart-item-header">
+              <h3>${item.destinasi}</h3>
+              <button class="cart-item-delete" onclick="hapusCartItem(${index}, ${isCart})">🗑️ Hapus</button>
+            </div>
+            <div class="cart-item-details">
+              <p><strong>ID:</strong> ${item.id}</p>
+              ${!isCart ? `<p><strong>Tanggal:</strong> ${item.tanggal}</p>` : ''}
+              <p><strong>Dewasa:</strong> ${item.dewasa || 0} | <strong>Anak:</strong> ${item.anak || 0}</p>
+              <p><strong>Total:</strong> ${item.total}</p>
+            </div>
+          </div>
+        `;
+        cartItemsDiv.innerHTML += itemHTML;
+      });
+
+      if (cartSummary) {
+        cartSummary.innerText = `${itemsToShow.length} item${itemsToShow.length === 1 ? '' : 's'}`;
       }
     }
 
@@ -1232,13 +1223,25 @@
       }
     }
 
-    // Fungsi untuk menghapus item di keranjang
-    function hapusCartItem(index) {
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      cart.splice(index, 1);
-      localStorage.setItem("cart", JSON.stringify(cart));
+    // Fungsi untuk membuka halaman keranjang
+    function bukaCart() {
+      tampilkanCart();
+      document.getElementById("cartPage").style.display = "flex";
+    }
 
-      document.getElementById("cartCount").innerText = cart.length;
+    // Fungsi untuk menutup halaman keranjang
+    function tutupCart() {
+      document.getElementById("cartPage").style.display = "none";
+    }
+
+    // Fungsi untuk menghapus item di keranjang
+    function hapusCartItem(index, isCart) {
+      const key = isCart ? "cart" : "orders";
+      let items = JSON.parse(localStorage.getItem(key)) || [];
+      items.splice(index, 1);
+      localStorage.setItem(key, JSON.stringify(items));
+
+      updateCartIcon();
       tampilkanCart();
     }
 
