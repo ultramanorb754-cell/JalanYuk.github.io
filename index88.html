@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zaka web travel</title>
   <link rel="stylesheet" href="style.css?v=2">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
   <style>
@@ -181,9 +181,8 @@
     <ul>
       <li><a href="#home">Beranda</a></li>
       <li><a href="#destinasi">Destinasi</a></li>
-      <li><a href="#statistik">Statistik</a></li>
       <li><a href="#tentang">Tentang</a></li>
-      <li><a href="#kontak">Kontak</a></li>
+      <li><a href="#statistik">Statistik</a></li>
     </ul>
 
     <div class="nav-right">
@@ -201,17 +200,14 @@
     <ul>
       <li><a href="#home" onclick="toggleMenu()">Beranda</a></li>
       <li><a href="#destinasi" onclick="toggleMenu()">Destinasi</a></li>
-      <li><a href="#statistik" onclick="toggleMenu()">Statistik</a></li>
       <li><a href="#tentang" onclick="toggleMenu()">Tentang</a></li>
-      <li><a href="#kontak" onclick="toggleMenu()">Kontak</a></li>
+      <li><a href="#statistik" onclick="toggleMenu()">Statistik</a></li>
     </ul>
   </div>
 
   <div class="page-wrapper">
     <header id="home" class="hero">
-
       <div class="slider">
-
         <div class="slide active">
           <img src="japan.png" alt="Japan">
           <div class="overlay"></div>
@@ -221,6 +217,7 @@
               Nikmati Tokyo, Gunung Fuji, Kyoto, dan budaya tradisional Jepang
               yang memadukan sejarah dengan modernitas.
             </p>
+            <a href="#destinasi" class="slide-cta">Jelajahi Sekarang</a>
           </div>
         </div>
 
@@ -233,6 +230,7 @@
               Jelajahi pegunungan Alpen, danau yang jernih,
               dan kota romantis dengan pemandangan indah.
             </p>
+            <a href="#destinasi" class="slide-cta">Jelajahi Sekarang</a>
           </div>
         </div>
 
@@ -245,6 +243,7 @@
               Kunjungi Makkah, Madinah, dan Riyadh untuk wisata religi
               dan pengalaman modern yang mewah.
             </p>
+            <a href="#destinasi" class="slide-cta">Jelajahi Sekarang</a>
           </div>
         </div>
 
@@ -257,6 +256,7 @@
               Nikmati Sydney Opera House, Melbourne,
               dan Great Barrier Reef yang terkenal di dunia.
             </p>
+            <a href="#destinasi" class="slide-cta">Jelajahi Sekarang</a>
           </div>
         </div>
 
@@ -266,11 +266,14 @@
           <div class="slide-content">
             <h1>Indonesia</h1>
             <p>
-              Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot
+              Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot yang memukau.
             </p>
+            <a href="#destinasi" class="slide-cta">Jelajahi Sekarang</a>
           </div>
         </div>
 
+        <!-- Dots -->
+        <div class="slider-dots" id="sliderDots"></div>
       </div>
     </header>
 
@@ -946,6 +949,12 @@
           Website "JALAN YUK" yang membantu kamu menemukan destinasi terbaik dunia
           dengan harga terjangkau dan pengalaman tak terlupakan.
         </p>
+        <div class="footer-social">
+          <a href="https://www.tiktok.com/@wakik11" target="_blank" aria-label="TikTok"><i
+              class="fab fa-tiktok"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
       </div>
 
       <!-- TENGAH -->
@@ -954,9 +963,8 @@
         <ul>
           <li><a href="#home">Beranda</a></li>
           <li><a href="#destinasi">Destinasi</a></li>
-          <li><a href="#statistik">Statistik</a></li>
           <li><a href="#tentang">Tentang</a></li>
-          <li><a href="#kontak">Kontak</a></li>
+          <li><a href="#statistik">Statistik</a></li>
         </ul>
       </div>
 
@@ -1187,6 +1195,17 @@
     function pesanSekarang() {
       document.getElementById("popup").style.display = "none";
 
+      // Otomatis pilih destinasi di form
+      const selectDest = document.getElementById("destinasiPesan");
+      if (selectDest && selectedCartDest) {
+        selectDest.value = selectedCartDest;
+      }
+
+      // Hitung total di form
+      if (typeof hitungTotal === 'function') {
+        hitungTotal();
+      }
+
       document.getElementById("pesan").scrollIntoView({
         behavior: "smooth"
       });
@@ -1283,20 +1302,54 @@
 
   <script>
     const slides = document.querySelectorAll(".slide");
+    const dotsContainer = document.getElementById("sliderDots");
+
     let index = 0;
+    let slideInterval;
+    const duration = 6000; // 6 seconds per slide
 
-    function changeSlide() {
-      slides[index].classList.remove("active");
+    // Create dots
+    slides.forEach((_, i) => {
+      const dot = document.createElement("div");
+      dot.className = i === 0 ? "dot active" : "dot";
+      dot.addEventListener("click", () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    });
 
-      index++;
-      if (index >= slides.length) {
-        index = 0;
-      }
+    const dots = document.querySelectorAll(".dot");
 
-      slides[index].classList.add("active");
+    function updateSlider() {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("active", i === index);
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle("active", i === index);
+      });
     }
 
-    setInterval(changeSlide, 4000);
+    function goToSlide(n) {
+      index = n;
+      updateSlider();
+      restartAutoSlide();
+    }
+
+    function nextSlide() {
+      index = (index + 1) % slides.length;
+      updateSlider();
+    }
+
+    function prevSlide() {
+      index = (index - 1 + slides.length) % slides.length;
+      updateSlider();
+    }
+
+    function restartAutoSlide() {
+      if (slideInterval) clearInterval(slideInterval);
+      slideInterval = setInterval(nextSlide, duration);
+    }
+
+    // Start
+    restartAutoSlide();
 
     function kirimPesan(e) {
       e.preventDefault();
@@ -1396,7 +1449,10 @@
           <div class="cart-item ${isCart ? 'cart-type-item' : 'order-type-item'}">
             <div class="cart-item-header">
               <h3>${item.destinasi}</h3>
-              <button class="cart-item-delete" onclick="hapusCartItem(${index}, ${isCart})">🗑️ Hapus</button>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                ${isCart ? `<button class="cart-item-pesan" onclick="pesanItemSekarang('${item.destKey}', ${item.dewasa}, ${item.anak})">Pesan</button>` : ''}
+                <button class="cart-item-delete" onclick="hapusCartItem(${index}, ${isCart})">🗑️ Hapus</button>
+              </div>
             </div>
             <div class="cart-item-details">
               <p><strong>ID:</strong> ${item.id}</p>
@@ -1431,6 +1487,36 @@
     // Fungsi untuk menutup halaman keranjang
     function tutupCart() {
       document.getElementById("cartPage").style.display = "none";
+    }
+
+    // Fungsi untuk pesan sekarang dari keranjang
+    function pesanSekarangDariCart() {
+      tutupCart();
+      document.getElementById("pesan").scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+
+    // Fungsi untuk pesan item tertentu dari keranjang
+    function pesanItemSekarang(destKey, dewasa, anak) {
+      tutupCart();
+
+      // Isi form secara otomatis
+      const selectDest = document.getElementById("destinasiPesan");
+      const inputDewasa = document.getElementById("dewasa");
+      const inputAnak = document.getElementById("anak");
+
+      if (selectDest) selectDest.value = destKey;
+      if (inputDewasa) inputDewasa.value = dewasa;
+      if (inputAnak) inputAnak.value = anak;
+
+      // Hitung total harga di form
+      if (typeof hitungTotal === 'function') hitungTotal();
+
+      // Scroll ke form
+      document.getElementById("pesan").scrollIntoView({
+        behavior: "smooth"
+      });
     }
 
     // Fungsi untuk menghapus item di keranjang
