@@ -148,6 +148,7 @@
     // Update cart icon saat page load
     document.addEventListener("DOMContentLoaded", () => {
       updateCartIcon();
+      updateRatingUI();
     });
 
     // Real-time synchronization between tabs (e.g., Mobile view vs Desktop admin view)
@@ -286,6 +287,12 @@
             <p>Jelajahi Marina Bay Sands, Universal Studios, dan Sentosa.</p>
             <p class="harga">Mulai dari Rp 12.000.000</p>
             <div class="sold-badge" id="sold-singapore">Terjual</div>
+            <div class="rating-container" id="rating-singapore">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('singapore')">Lihat Detail</button>
           </div>
 
@@ -303,6 +310,12 @@
             <p>Nikmati pantai Kuta, Ubud, dan keindahan Tanah Lot.</p>
             <p class="harga">Mulai dari Rp 15.000.000</p>
             <div class="sold-badge" id="sold-indonesia">Terjual</div>
+            <div class="rating-container" id="rating-indonesia">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('indonesia')">Lihat Detail</button>
           </div>
 
@@ -320,6 +333,12 @@
             <p>Kunjungi Bangkok, Phuket, dan Pattaya yang populer.</p>
             <p class="harga">Mulai dari Rp 18.000.000</p>
             <div class="sold-badge" id="sold-thailand">Terjual</div>
+            <div class="rating-container" id="rating-thailand">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('thailand')">Lihat Detail</button>
           </div>
 
@@ -337,6 +356,12 @@
             <p>Jelajahi Beijing, Tembok Besar China, dan gemerlap kota Shanghai.</p>
             <p class="harga">Mulai dari Rp 22.000.000</p>
             <div class="sold-badge" id="sold-china">Terjual</div>
+            <div class="rating-container" id="rating-china">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('china')">Lihat Detail</button>
           </div>
 
@@ -354,6 +379,12 @@
             <p>Nikmati Seoul, Nami Island, dan budaya K-Pop yang mendunia.</p>
             <p class="harga">Mulai dari Rp 24.000.000</p>
             <div class="sold-badge" id="sold-korsel">Terjual</div>
+            <div class="rating-container" id="rating-korsel">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('korsel')">Lihat Detail</button>
           </div>
 
@@ -372,6 +403,12 @@
             <p>Nikmati keindahan Tokyo, Gunung Fuji, dan budaya tradisional Kyoto.</p>
             <p class="harga">Mulai dari Rp 25.000.000</p>
             <div class="sold-badge" id="sold-japan">Terjual</div>
+            <div class="rating-container" id="rating-japan">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('japan')">Lihat Detail</button>
           </div>
 
@@ -389,6 +426,12 @@
             <p>Nikmati Cappadocia, Istanbul, dan Hagia Sophia.</p>
             <p class="harga">Mulai dari Rp 27.000.000</p>
             <div class="sold-badge" id="sold-turkey">Terjual</div>
+            <div class="rating-container" id="rating-turkey">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('turkey')">Lihat Detail</button>
           </div>
 
@@ -406,6 +449,12 @@
             <p>Eksplor Sydney Opera House, Melbourne, dan Great Barrier Reef.</p>
             <p class="harga">Mulai dari Rp 28.000.000</p>
             <div class="sold-badge" id="sold-australia">Terjual</div>
+            <div class="rating-container" id="rating-australia">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('australia')">Lihat Detail</button>
           </div>
 
@@ -424,6 +473,12 @@
             <p>Kunjungi Makkah, Madinah, dan wisata modern kota Riyadh.</p>
             <p class="harga">Mulai dari Rp 30.000.000</p>
             <div class="sold-badge" id="sold-saudi">Terjual</div>
+            <div class="rating-container" id="rating-saudi">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('saudi')">Lihat Detail</button>
           </div>
 
@@ -441,6 +496,12 @@
             <p>Kunjungi Menara Eiffel, Louvre, dan kota romantis Paris.</p>
             <p class="harga">Mulai dari Rp 32.000.000</p>
             <div class="sold-badge" id="sold-france">Terjual</div>
+            <div class="rating-container" id="rating-france">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('france')">Lihat Detail</button>
           </div>
 
@@ -459,6 +520,12 @@
             <p>Jelajahi London, Big Ben, dan Istana Buckingham.</p>
             <p class="harga">Mulai dari Rp 33.000.000</p>
             <div class="sold-badge" id="sold-inggris">Terjual</div>
+            <div class="rating-container" id="rating-inggris">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('inggris')">Lihat Detail</button>
           </div>
 
@@ -476,6 +543,12 @@
             <p>Jelajahi Roma, Venesia, dan Menara Pisa yang ikonik.</p>
             <p class="harga">Mulai dari Rp 34.000.000</p>
             <div class="sold-badge" id="sold-italy">Terjual</div>
+            <div class="rating-container" id="rating-italy">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('italy')">Lihat Detail</button>
           </div>
 
@@ -493,6 +566,12 @@
             <p>Jelajahi pegunungan Alpen, Danau Zurich, dan kota Lucerne.</p>
             <p class="harga">Mulai dari Rp 35.000.000</p>
             <div class="sold-badge" id="sold-swiss">Terjual</div>
+            <div class="rating-container" id="rating-swiss">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('swiss')">Lihat Detail</button>
           </div>
 
@@ -510,6 +589,12 @@
             <p>Kunjungi Moskow, Kremlin, dan Saint Petersburg yang megah.</p>
             <p class="harga">Mulai dari Rp 36.000.000</p>
             <div class="sold-badge" id="sold-rusia">Terjual</div>
+            <div class="rating-container" id="rating-rusia">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('rusia')">Lihat Detail</button>
           </div>
 
@@ -527,6 +612,12 @@
             <p>Kunjungi New York, Los Angeles, dan Grand Canyon yang terkenal.</p>
             <p class="harga">Mulai dari Rp 38.000.000</p>
             <div class="sold-badge" id="sold-amerika">Terjual</div>
+            <div class="rating-container" id="rating-amerika">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('amerika')">Lihat Detail</button>
           </div>
 
@@ -544,6 +635,12 @@
             <p>Kunjungi Pyongyang dan wisata sejarah yang unik dan eksklusif.</p>
             <p class="harga">Mulai dari Rp 40.000.000</p>
             <div class="sold-badge" id="sold-korut">Terjual</div>
+            <div class="rating-container" id="rating-korut">
+              <div class="stars">
+                <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              </div>
+              <span class="rating-text">0.0 (0)</span>
+            </div>
             <button onclick="bukaPopup('korut')">Lihat Detail</button>
           </div>
 
@@ -984,6 +1081,85 @@
   </script>
 
   <script>
+    function getStoredRatings() {
+      return JSON.parse(localStorage.getItem("destinationRatings")) || {};
+    }
+
+    function updateRatingUI() {
+      const ratings = getStoredRatings();
+      const allDestKeys = Object.keys(destinationLabels);
+
+      allDestKeys.forEach(destKey => {
+        const data = ratings[destKey] || { total: 0, count: 0 };
+        const average = data.count > 0 ? (data.total / data.count).toFixed(1) : "0.0";
+        const container = document.getElementById(`rating-${destKey}`);
+
+        if (container) {
+          const stars = container.querySelectorAll(".star");
+          const avgNum = parseFloat(average);
+          
+          stars.forEach((star, index) => {
+            star.classList.toggle("filled", index < Math.round(avgNum));
+          });
+          
+          container.querySelector(".rating-text").innerText = `${average} (${data.count})`;
+        }
+      });
+    }
+
+    function submitRating(score) {
+      if (!selectedCartDest) return;
+      
+      const ratings = getStoredRatings();
+      if (!ratings[selectedCartDest]) {
+        ratings[selectedCartDest] = { total: 0, count: 0 };
+      }
+      
+      const destData = ratings[selectedCartDest];
+      
+      destData.total += score;
+      destData.count += 1;
+      
+      localStorage.setItem("destinationRatings", JSON.stringify(ratings));
+      
+      highlightInteractiveStars(score);
+      updateRatingUI();
+      showToastRating(destinationLabels[selectedCartDest]);
+    }
+
+    function highlightInteractiveStars(score) {
+      const interactiveStars = document.querySelectorAll("#stars-interactive .star");
+      interactiveStars.forEach((star, index) => {
+        star.classList.toggle("filled", index < score);
+      });
+    }
+
+    function showToastRating(destination) {
+      let toast = document.getElementById('toastRating');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toastRating';
+        toast.className = 'toast-cart';
+        toast.style.background = "linear-gradient(135deg, #ffc107, #ff9800)";
+        toast.style.color = "white";
+        toast.innerHTML = `
+          <span class="toast-icon">⭐</span>
+          <div class="toast-text">
+            <strong>${destination}</strong>
+            <span style="color:white; opacity:0.9;">Rating Anda telah disimpan!</span>
+          </div>
+        `;
+        document.body.appendChild(toast);
+      } else {
+        toast.querySelector('strong').innerText = destination;
+      }
+
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
     function tutupPopup() {
       document.getElementById("popup").style.display = "none";
     }
@@ -1076,6 +1252,9 @@
 
       const popup = document.getElementById("popup");
       popup.style.display = "flex";
+      
+      // Reset interactive stars when opening popup
+      highlightInteractiveStars(0);
     }
 
   </script>
@@ -1426,6 +1605,14 @@
       <h2 id="popup-title"></h2>
       <p id="popup-desc"></p>
       <p class="harga" id="popup-price"></p>
+      <div class="rating-popup-label">Beri Rating Destinasi Ini:</div>
+      <div class="stars-interactive" id="stars-interactive">
+        <span class="star" data-value="1" onclick="submitRating(1)">★</span>
+        <span class="star" data-value="2" onclick="submitRating(2)">★</span>
+        <span class="star" data-value="3" onclick="submitRating(3)">★</span>
+        <span class="star" data-value="4" onclick="submitRating(4)">★</span>
+        <span class="star" data-value="5" onclick="submitRating(5)">★</span>
+      </div>
       <div class="popup-btn">
         <button class="btn-tutup" onclick="tutupPopup()">Tutup</button>
         <button class="btn-cart" onclick="tambahKeKeranjang()">🛒 Keranjang</button>

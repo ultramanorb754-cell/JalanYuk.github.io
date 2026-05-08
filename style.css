@@ -1751,3 +1751,76 @@
     color: #aaa;
   }
 
+  /* ================= RATING ================= */
+  .rating-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin: 5px 0 10px;
+  }
+
+  .stars {
+      display: flex;
+      gap: 2px;
+  }
+
+  .star {
+      font-size: 1.1rem;
+      color: #ccc;
+      cursor: default;
+      transition: color 0.2s ease;
+  }
+
+  .star.filled {
+      color: #ffc107;
+  }
+
+  .rating-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #666;
+      margin-left: 4px;
+  }
+
+  body.dark .rating-text {
+      color: #bbb;
+  }
+
+  /* Interactive Stars for Popup */
+  .stars-interactive {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 15px 0;
+  }
+
+  .stars-interactive .star {
+      font-size: 2rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .stars-interactive .star:hover {
+      transform: scale(1.2);
+  }
+
+  .stars-interactive:hover .star {
+      color: #ffc107;
+  }
+
+  .stars-interactive .star:hover ~ .star {
+      color: #ccc;
+  }
+
+  .rating-popup-label {
+      font-size: 0.9rem;
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 5px;
+  }
+
+  body.dark .rating-popup-label {
+      color: #aaa;
+  }
+
