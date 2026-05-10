@@ -77,6 +77,74 @@
           `<div>Terjual: <b>${totalTerjual}</b></div>`;
         badge.style.opacity = totalTerjual > 0 ? "1" : "0.6";
       });
+      
+      // Update dynamic badges based on new sales data
+      updateDestinationBadges();
+    }
+
+    function updateDestinationBadges() {
+      const orders = getStoredOrders();
+      const ratings = getStoredRatings();
+      
+      const salesMap = {};
+      const ratingCountMap = {};
+      
+      // Calculate sales per destination
+      orders.forEach(order => {
+        const key = order.destKey || getDestinationKey(order.destinasi);
+        if (!key) return;
+        salesMap[key] = (salesMap[key] || 0) + (order.dewasa || 0) + (order.anak || 0);
+      });
+      
+      // Get rating count per destination
+      for (const key in ratings) {
+        ratingCountMap[key] = ratings[key].count || 0;
+      }
+      
+      // Find maximum values
+      let maxSales = 0;
+      for (const key in salesMap) {
+        if (salesMap[key] > maxSales) maxSales = salesMap[key];
+      }
+      
+      let maxRatings = 0;
+      for (const key in ratingCountMap) {
+        if (ratingCountMap[key] > maxRatings) maxRatings = ratingCountMap[key];
+      }
+
+      // Update badges on all cards
+      const cards = document.querySelectorAll(".card");
+      cards.forEach(card => {
+        const soldBadge = card.querySelector(".sold-badge");
+        if (!soldBadge) return;
+        
+        const destKey = soldBadge.id.replace("sold-", "");
+        const badge = card.querySelector(".badge");
+        if (!badge) return;
+
+        // Remove existing category classes
+        badge.classList.remove("best", "populer", "trending", "religi");
+
+        // Logic:
+        // 1. Arab Saudi is always Wisata Religi
+        // 2. Best Seller if sales > 80
+        // 3. Pilihan Populer if ratings > 50
+        // 4. Trending otherwise (low sales/ratings)
+        
+        if (destKey === "saudi") {
+          badge.classList.add("religi");
+          badge.innerHTML = "🕌 Wisata Religi";
+        } else if (salesMap[destKey] > 80) {
+          badge.classList.add("best");
+          badge.innerHTML = "🔥 Best Seller";
+        } else if (ratingCountMap[destKey] > 50) {
+          badge.classList.add("populer");
+          badge.innerHTML = "⭐ Pilihan Populer";
+        } else {
+          badge.classList.add("trending");
+          badge.innerHTML = "📈 Trending";
+        }
+      });
     }
 
     const destinationLabels = {
@@ -135,6 +203,7 @@
       document.getElementById("cartCount").innerText = cart.length;
       updateDestinationSalesCount();
       updateStatistics();
+      updateDestinationBadges();
     }
 
     // Clear everything to start from zero for this version
@@ -1133,6 +1202,11 @@
           container.querySelector(".rating-text").innerText = `${average} (${data.count})`;
         }
       });
+      
+      // Update badges whenever ratings change
+      if (typeof updateDestinationBadges === 'function') {
+        updateDestinationBadges();
+      }
     }
 
     function submitRating(score) {
@@ -1411,6 +1485,7 @@
       document.getElementById("cartCount").innerText = cart.length + orders.length;
       updateDestinationSalesCount();
       updateStatistics();
+      updateDestinationBadges();
     }
 
     let currentCartTab = 'keranjang';
