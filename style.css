@@ -911,10 +911,11 @@
       border-radius:10px;
       cursor:pointer;
       transition:0.3s;
+      width: 100%;
   }
 
   .card button:hover{
-      background:#0097a7;
+      background:#000000;
   }
 
   /* ================= FORM ================= */
